@@ -82,9 +82,10 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 		String bookingUrlPre = "http://www.airserbia.com/booking.php";
 		BookingResult bookingResult = new BookingResult();
 		
-		String ym = arg0.getDepDate().substring(0, arg0.getDepDate().lastIndexOf("-"));
-		String dd = arg0.getDepDate().substring(arg0.getDepDate().lastIndexOf("-")+1,arg0.getDepDate().length());
-		
+	//	String ym = arg0.getDepDate().substring(0, arg0.getDepDate().lastIndexOf("-"));
+	//	String dd = arg0.getDepDate().substring(arg0.getDepDate().lastIndexOf("-")+1,arg0.getDepDate().length());
+		String ym = "2014-09";
+		String dd = "09";s
 		BookingInfo bookingInfo = new BookingInfo();
 		bookingInfo.setAction(bookingUrlPre);
 		bookingInfo.setMethod("post");
@@ -137,8 +138,10 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 		QFPostMethod post = null;
 		String[] arr = new String[5];
 		String url = "http://www.airserbia.com/booking.php";
-		String ym = arg0.getDepDate().substring(0, arg0.getDepDate().lastIndexOf("-"));
-		String dd = arg0.getDepDate().substring(arg0.getDepDate().lastIndexOf("-")+1,arg0.getDepDate().length());
+	//	String ym = arg0.getDepDate().substring(0, arg0.getDepDate().lastIndexOf("-"));
+	//	String dd = arg0.getDepDate().substring(arg0.getDepDate().lastIndexOf("-")+1,arg0.getDepDate().length());
+	        String ym = "2014-09";
+	        String dd = "09";
 		NameValuePair[] data = {
 				new NameValuePair("tripType", "one_way"),
 				new NameValuePair("fromCity", arg0.getDep()),
@@ -201,7 +204,8 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 	private String getResultHtml(String[] arr,FlightSearchParam arg0,QFHttpClient httpClient){
 		QFPostMethod post = null;
 		String url = "http://book.airserbia.com/plnext/AirSERBIA/Override.action";
-		String dateString = arg0.getDepDate().replaceAll("-", "")+"0000";
+	//	String dateString = arg0.getDepDate().replaceAll("-", "")+"0000";
+         	String dateString ="201409090000"
 		NameValuePair[] data = { new NameValuePair("ENVIRONMENT", "PRODUCTION_JAT"),
 				                  new NameValuePair("EMBEDDED_TRANSACTION", "FlexPricerAvailability"), 
 				                  new NameValuePair("LANGUAGE", "GB"),
