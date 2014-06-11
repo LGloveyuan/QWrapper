@@ -1,8 +1,14 @@
 import java.io.IOException;
+import java.text.Format;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
@@ -44,7 +50,7 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 		searchParam.setArr("TIV");*/
 		searchParam.setDep("AMS");
 		searchParam.setArr("BEG");
-		searchParam.setDepDate("2014-06-09");
+		searchParam.setDepDate("2014-08-18");
 		searchParam.setTimeOut("60000");
 		searchParam.setToken("");
 		searchParam.setWrapperid("gjdairju001");
@@ -360,5 +366,41 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 			return result;
 		}
 	}
-
+	/**
+	 * 把12小时制的时间转化成24小时制的时间
+	 * @param time
+	 * @return
+	 */
+	public static String get24Time(String time){
+		try {
+			Format f12 = new SimpleDateFormat("hh:mma", Locale.ENGLISH);
+			Format f24 = new SimpleDateFormat("HH:mm");
+			return f24.format(f12.parseObject(time)) ;
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null ;
+	}
+	
+	/**
+	 * 获取日期，格式为：yyyy-MM-dd
+	 * @param date
+	 * @return
+	 */
+	public static String getDateStr(Date date,String formatStr){
+		SimpleDateFormat format = new SimpleDateFormat(formatStr) ;
+		format.setTimeZone(TimeZone.getTimeZone("GMT"));
+		return format.format(date) ;
+	}
+	
+	/**
+	 * 返回解析后的date对象
+	 * @param date--日期字符串 yyyy-MM-dd
+	 * @return
+	 * @throws ParseException
+	 */
+	public static Date getDate(String date) throws ParseException{
+		return new SimpleDateFormat("yyyy-MM-dd").parse(date) ;
+	}
 }
