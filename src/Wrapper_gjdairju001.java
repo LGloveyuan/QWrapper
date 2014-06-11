@@ -205,7 +205,7 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 		QFPostMethod post = null;
 		String url = "http://book.airserbia.com/plnext/AirSERBIA/Override.action";
 	//	String dateString = arg0.getDepDate().replaceAll("-", "")+"0000";
-         	String dateString ="201409090000"
+         	String dateString ="201409090000";
 		NameValuePair[] data = { new NameValuePair("ENVIRONMENT", "PRODUCTION_JAT"),
 				                  new NameValuePair("EMBEDDED_TRANSACTION", "FlexPricerAvailability"), 
 				                  new NameValuePair("LANGUAGE", "GB"),
