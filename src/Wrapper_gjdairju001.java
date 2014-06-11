@@ -85,7 +85,7 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 	//	String ym = arg0.getDepDate().substring(0, arg0.getDepDate().lastIndexOf("-"));
 	//	String dd = arg0.getDepDate().substring(arg0.getDepDate().lastIndexOf("-")+1,arg0.getDepDate().length());
 		String ym = "2014-09";
-		String dd = "09";s
+		String dd = "09";
 		BookingInfo bookingInfo = new BookingInfo();
 		bookingInfo.setAction(bookingUrlPre);
 		bookingInfo.setMethod("post");
