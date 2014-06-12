@@ -328,7 +328,8 @@ public class Wrapper_gjsairju001 implements QunarCrawler {
 						retFlight.setRetinfo(retSegs);
 						retFlight.setDetail(flightDetail) ;//detail
 						retFlight.setOutboundPrice(object.getDouble("total_amount")) ;//去程价格
-						retFlight.setRetdepdate(getDepdate(retsegJSON, false)) ;//返程日期
+					//	retFlight.setRetdepdate(getDepdate(retsegJSON, false)) ;//返程日期
+						retFlight.setRetdepdate(getDate(arg1.getRetDate())) ;//返程日期
 						retFlight.setRetflightno(retFlightNos) ; //返程航班号
 						retFlight.setReturnedPrice(retobject.getDouble("total_amount")) ;//返程价格
 						roundList.add(retFlight);
