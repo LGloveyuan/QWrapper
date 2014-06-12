@@ -1,4 +1,6 @@
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -51,9 +53,9 @@ public class Wrapper_gjsairju001 implements QunarCrawler {
 		ProcessResultInfo result = new ProcessResultInfo();
 		result = new Wrapper_gjsairju001().process(html, searchParam);
 		if (result.isRet() && result.getStatus().equals(Constants.SUCCESS)) {
-			List<OneWayFlightInfo> flightList = (List<OneWayFlightInfo>) result
+			List<RoundTripFlightInfo> flightList = (List<RoundTripFlightInfo>) result
 					.getData();
-			for (OneWayFlightInfo in : flightList) {
+			for (RoundTripFlightInfo in : flightList) {
 				System.out.println("************" + in.getInfo().toString());
 				System.out.println("++++++++++++" + in.getDetail().toString());
 
@@ -375,9 +377,15 @@ public class Wrapper_gjsairju001 implements QunarCrawler {
 			String pre = preFlightNo.getString("code");
 			String flightNo = fjson.getString("flight_number").replaceAll("[^a-zA-Z\\d]", "");
 			String depString = fjson.getString("b_date_date");
+			String arrString = fjson.getString("e_date_date");
 			String formatDep = "";
 			if(null != depString && !"".equals(depString)){
 				formatDep = depString.substring(0, 4)+"-"+depString.substring(4,6)+"-"+depString.substring(6,8);
+			}
+			
+			String formatArr = "";
+			if(null != arrString && !"".equals(arrString)){
+				formatArr = arrString.substring(0, 4)+"-"+arrString.substring(4,6)+"-"+arrString.substring(6,8);
 			}
 			JSONObject beginLocation = JSON.parseObject(fjson.getString("b_location"));
 			String depairport = beginLocation.getString("location_code").replaceAll("[^a-zA-Z\\d]", "");
@@ -386,7 +394,7 @@ public class Wrapper_gjsairju001 implements QunarCrawler {
 			flightNoList.add(pre+flightNo);
 			seg.setFlightno(pre+flightNo);
 			seg.setDepDate(formatDep);
-			seg.setArrDate(formatDep);
+			seg.setArrDate(formatArr);
 			seg.setDepairport(depairport);
 			seg.setArrairport(arrairport);
 			seg.setDeptime(fjson.getString("b_date_formatted_time"));
@@ -441,6 +449,7 @@ public class Wrapper_gjsairju001 implements QunarCrawler {
 	}
 	
 	/**
+	 * @throws ParseException 
 	 * 
 	 * @Title: getFlightDetail 
 	 * @Description: 获取航班详情信息
@@ -451,10 +460,10 @@ public class Wrapper_gjsairju001 implements QunarCrawler {
 	 * @return     
 	 * @throws
 	 */
-	private FlightDetail getFlightDetail(FlightDetail flightDetail,JSONArray jsonArray,JSONObject ojson,FlightSearchParam arg1){
+	private FlightDetail getFlightDetail(FlightDetail flightDetail,JSONArray jsonArray,JSONObject ojson,FlightSearchParam arg1) throws ParseException{
 		if(jsonArray.size() >= 0){
 			JSONObject priceJson = jsonArray.getJSONObject(0);
-			flightDetail.setDepdate(ojson.getDate("b_date_date"));
+			flightDetail.setDepdate(getDate(arg1.getDepDate()));
 			flightDetail.setMonetaryunit(JSON.parseObject(priceJson.getString("currency")).getString("code"));
 			flightDetail.setPrice(priceJson.getDouble("total_amount"));
 			flightDetail.setDepcity(arg1.getDep());
@@ -466,5 +475,14 @@ public class Wrapper_gjsairju001 implements QunarCrawler {
 		return flightDetail;
 	}
 	
+	/**
+	 * 返回解析后的date对象
+	 * @param date--日期字符串 yyyy-MM-dd
+	 * @return
+	 * @throws ParseException
+	 */
+	public static Date getDate(String date) throws ParseException{
+		return new SimpleDateFormat("yyyy-MM-dd").parse(date) ;
+	}
 
 }
