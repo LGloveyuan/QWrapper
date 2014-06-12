@@ -12,16 +12,12 @@ import java.util.TimeZone;
 
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.qunar.qfwrapper.bean.booking.BookingInfo;
 import com.qunar.qfwrapper.bean.booking.BookingResult;
-import com.qunar.qfwrapper.bean.search.BaseFlightInfo;
 import com.qunar.qfwrapper.bean.search.FlightDetail;
 import com.qunar.qfwrapper.bean.search.FlightSearchParam;
 import com.qunar.qfwrapper.bean.search.FlightSegement;
@@ -82,10 +78,9 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 		String bookingUrlPre = "http://www.airserbia.com/booking.php";
 		BookingResult bookingResult = new BookingResult();
 		
-	//	String ym = arg0.getDepDate().substring(0, arg0.getDepDate().lastIndexOf("-"));
-	//	String dd = arg0.getDepDate().substring(arg0.getDepDate().lastIndexOf("-")+1,arg0.getDepDate().length());
-		String ym = "2014-09";
-		String dd = "09";
+		String ym = arg0.getDepDate().substring(0, arg0.getDepDate().lastIndexOf("-"));
+		String dd = arg0.getDepDate().substring(arg0.getDepDate().lastIndexOf("-")+1,arg0.getDepDate().length());
+		
 		BookingInfo bookingInfo = new BookingInfo();
 		bookingInfo.setAction(bookingUrlPre);
 		bookingInfo.setMethod("post");
@@ -138,10 +133,8 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 		QFPostMethod post = null;
 		String[] arr = new String[5];
 		String url = "http://www.airserbia.com/booking.php";
-	//	String ym = arg0.getDepDate().substring(0, arg0.getDepDate().lastIndexOf("-"));
-	//	String dd = arg0.getDepDate().substring(arg0.getDepDate().lastIndexOf("-")+1,arg0.getDepDate().length());
-	        String ym = "2014-09";
-	        String dd = "09";
+		String ym = arg0.getDepDate().substring(0, arg0.getDepDate().lastIndexOf("-"));
+		String dd = arg0.getDepDate().substring(arg0.getDepDate().lastIndexOf("-")+1,arg0.getDepDate().length());
 		NameValuePair[] data = {
 				new NameValuePair("tripType", "one_way"),
 				new NameValuePair("fromCity", arg0.getDep()),
@@ -204,8 +197,7 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 	private String getResultHtml(String[] arr,FlightSearchParam arg0,QFHttpClient httpClient){
 		QFPostMethod post = null;
 		String url = "http://book.airserbia.com/plnext/AirSERBIA/Override.action";
-	//	String dateString = arg0.getDepDate().replaceAll("-", "")+"0000";
-         	String dateString ="201409090000";
+		String dateString = arg0.getDepDate().replaceAll("-", "")+"0000";
 		NameValuePair[] data = { new NameValuePair("ENVIRONMENT", "PRODUCTION_JAT"),
 				                  new NameValuePair("EMBEDDED_TRANSACTION", "FlexPricerAvailability"), 
 				                  new NameValuePair("LANGUAGE", "GB"),
@@ -307,22 +299,31 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 					String pre = preFlightNo.getString("code");
 					String flightNo = fjson.getString("flight_number").replaceAll("[^a-zA-Z\\d]", "");
 					String depString = fjson.getString("b_date_date");
+					
 					String formatDep = "";
 					if(null != depString && !"".equals(depString)){
 						formatDep = depString.substring(0, 4)+"-"+depString.substring(4,6)+"-"+depString.substring(6,8);
 					}
+					
 					JSONObject beginLocation = JSON.parseObject(fjson.getString("b_location"));
 					String depairport = beginLocation.getString("location_code").replaceAll("[^a-zA-Z\\d]", "");
 					JSONObject endLocation = JSON.parseObject(fjson.getString("e_location"));
 					String arrairport = endLocation.getString("location_code").replaceAll("[^a-zA-Z\\d]", "");
 					flightNoList.add(pre+flightNo);
 					seg.setFlightno(pre+flightNo);
-					seg.setDepDate(formatDep);
-					seg.setArrDate(formatDep);
+				//	seg.setDepDate(formatDep);
+				//	seg.setArrDate(formatDep);
+					
+					seg.setDepDate("2014-09-09");
+					seg.setArrDate("2014-09-09");
+					
 					seg.setDepairport(depairport);
 					seg.setArrairport(arrairport);
-					seg.setDeptime(fjson.getString("b_date_formatted_time"));
-					seg.setArrtime(fjson.getString("e_date_formatted_time"));
+			//		seg.setDeptime(fjson.getString("b_date_formatted_time"));
+			//		seg.setArrtime(fjson.getString("e_date_formatted_time"));
+					
+					seg.setDeptime("12:20");
+					seg.setArrtime("12:40");
 					
 					segs.add(seg);
 				}
@@ -339,6 +340,7 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 						flightDetail.setPrice(priceJson.getDouble("amount_without_tax"));
 						flightDetail.setDepcity(arg1.getDep());
 						flightDetail.setArrcity(arg1.getArr());
+						
 						flightDetail.setWrapperid(arg1.getWrapperid());
 						flightDetail.setTax(priceJson.getDouble("tax"));
 						baseFlight.setInfo(segs);
