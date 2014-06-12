@@ -268,7 +268,7 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 			return result;			
 		}		
 		//需要有明显的提示语句，才能判断是否INVALID_DATE|INVALID_AIRLINE|NO_RESULT
-		if (html.indexOf("wrong data") != -1) {
+		if (null != html && html.indexOf("wrong data") != -1) {
 			result.setRet(false);
 			result.setStatus(Constants.INVALID_DATE);
 			return result;			
