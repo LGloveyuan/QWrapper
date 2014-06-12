@@ -172,7 +172,9 @@ public class Wrapper_gjsairju001 implements QunarCrawler {
 		if(html.indexOf("wrong data") != -1){
 			return null;
 		}else{
-			String ip = html.substring(html.indexOf("portal_var_3\" value=\"")+21, html.indexOf("||Global"));
+			String ip = org.apache.commons.lang.StringUtils.substringBetween(
+					html, "portal_var_3\" value=\"", "||Global");
+		//	String ip = html.substring(html.indexOf("portal_var_3\" value=\"")+21, html.indexOf("||Global"));
 			String mozilla = org.apache.commons.lang.StringUtils.substringBetween(
 					html, "portal_var_5\" value=\"", "\" />");
 			arr[0] = ip;
