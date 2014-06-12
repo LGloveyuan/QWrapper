@@ -311,19 +311,13 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 					String arrairport = endLocation.getString("location_code").replaceAll("[^a-zA-Z\\d]", "");
 					flightNoList.add(pre+flightNo);
 					seg.setFlightno(pre+flightNo);
-				//	seg.setDepDate(formatDep);
-				//	seg.setArrDate(formatDep);
-					
-					seg.setDepDate("2014-09-09");
-					seg.setArrDate("2014-09-09");
+					seg.setDepDate(formatDep);
+					seg.setArrDate(formatDep);
 					
 					seg.setDepairport(depairport);
 					seg.setArrairport(arrairport);
-			//		seg.setDeptime(fjson.getString("b_date_formatted_time"));
-			//		seg.setArrtime(fjson.getString("e_date_formatted_time"));
-					
-					seg.setDeptime("12:20");
-					seg.setArrtime("12:40");
+					seg.setDeptime(fjson.getString("b_date_formatted_time"));
+					seg.setArrtime(fjson.getString("e_date_formatted_time"));
 					
 					segs.add(seg);
 				}
@@ -334,7 +328,8 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 					JSONArray jsonArray = JSON.parseArray(djson.getJSONObject(i).getString("list_trip_price"));
 					if(jsonArray.size() >= 0){
 						JSONObject priceJson = jsonArray.getJSONObject(0);
-						flightDetail.setDepdate(ojson.getDate("b_date_date"));
+					//	flightDetail.setDepdate(ojson.getDate("b_date_date"));
+						flightDetail.setDepdate(getDate(arg1.getDepDate()));
 						flightDetail.setFlightno(flightNoList);
 						flightDetail.setMonetaryunit(JSON.parseObject(priceJson.getString("currency")).getString("code"));
 						flightDetail.setPrice(priceJson.getDouble("amount_without_tax"));
