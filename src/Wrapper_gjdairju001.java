@@ -365,7 +365,7 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 			return result;
 		} catch(Exception e){
 			result.setRet(false);
-			result.setStatus(Constants.PARSING_FAIL);
+		//	result.setStatus(Constants.PARSING_FAIL);
 			return result;
 		}
 	}
