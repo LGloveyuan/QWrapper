@@ -75,36 +75,16 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 
 	@Override
 	public BookingResult getBookingInfo(FlightSearchParam arg0) {
-	//	String bookingUrlPre = "http://www.airserbia.com/booking.php";
-		String bookingUrlPre = "http://book.airserbia.com/plnext/AirSERBIA/Override.action";
+		String bookingUrlPre = "http://www.airserbia.com/booking.php";
 		BookingResult bookingResult = new BookingResult();
 		
 		String ym = arg0.getDepDate().substring(0, arg0.getDepDate().lastIndexOf("-"));
 		String dd = arg0.getDepDate().substring(arg0.getDepDate().lastIndexOf("-")+1,arg0.getDepDate().length());
 		
-		String dateString = arg0.getDepDate().replaceAll("-", "")+"0000";
-		QFHttpClient httpClient = new QFHttpClient(arg0, false);
-		String[] arr = getIPAndVar(arg0,httpClient);
 		BookingInfo bookingInfo = new BookingInfo();
 		bookingInfo.setAction(bookingUrlPre);
 		bookingInfo.setMethod("post");
 		Map<String, String> map = new LinkedHashMap<String, String>();
-	/*	map.put("tripType", "one_way");
-		map.put("fromCity", arg0.getDep());
-		map.put("toCityStart", "");
-		map.put("startTimeYM", ym);
-		map.put("startTimeD", dd);
-		map.put("fromCityEnd", "");
-		map.put("toCity", arg0.getArr());
-		map.put("endTimeYM", ym);
-		map.put("endTimeD", dd);
-		map.put("fareFamily", "ECOFIRST");
-		map.put("passengersADT", "1");
-		map.put("passengersCHD", "0");
-		map.put("passengersINF", "0");
-		map.put("submit", "Book+Flight");
-		map.put("currentLang", "en");*/
-		
 		map.put("ENVIRONMENT", "PRODUCTION_JAT");
 		map.put("EMBEDDED_TRANSACTION", "FlexPricerAvailability");
 		map.put("LANGUAGE", "GB");
@@ -138,13 +118,6 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 		bookingResult.setData(bookingInfo);
 		bookingResult.setRet(true);
 		return bookingResult;
-		
-		
-				      
-				   
-				         
-		
-		
 	}
 
 	@Override
@@ -167,7 +140,7 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 	 * @param arg0 航班检索条件
 	 * @param post 
 	 * @param httpClient
-	 * @return     
+	 * @return     
 	 * @throws
 	 */
 	private String[] getIPAndVar(FlightSearchParam arg0,QFHttpClient httpClient){
@@ -234,7 +207,7 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 	 * @param arg0
 	 * @param post
 	 * @param httpClient
-	 * @return     
+	 * @return     
 	 * @throws
 	 */
 	private String getResultHtml(String[] arr,FlightSearchParam arg0,QFHttpClient httpClient){
@@ -295,7 +268,7 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 	}
 	
 	public ProcessResultInfo process(String arg0, FlightSearchParam arg1) {
-        String html = null;
+        String html = arg0;
         System.out.println(html);
 		
 		/* ProcessResultInfo中，
@@ -406,7 +379,7 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 			return result;
 		} catch(Exception e){
 			result.setRet(false);
-			result.setStatus(Constants.PARSING_FAIL);
+		//	result.setStatus(Constants.PARSING_FAIL);
 			return result;
 		}
 	}
