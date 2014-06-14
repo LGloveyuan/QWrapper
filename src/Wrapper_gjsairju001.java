@@ -67,33 +67,53 @@ public class Wrapper_gjsairju001 implements QunarCrawler {
 
 	@Override
 	public BookingResult getBookingInfo(FlightSearchParam arg0) {
-		String bookingUrlPre = "http://www.airserbia.com/booking.php";
+		String bookingUrlPre = "http://book.airserbia.com/plnext/AirSERBIA/Override.action";
 		BookingResult bookingResult = new BookingResult();
 		
-		String depYM = arg0.getDepDate().substring(0, arg0.getDepDate().lastIndexOf("-"));
-		String depDD = arg0.getDepDate().substring(arg0.getDepDate().lastIndexOf("-")+1,arg0.getDepDate().length());
-		String retYM = arg0.getRetDate().substring(0, arg0.getRetDate().lastIndexOf("-"));
-		String retDD = arg0.getRetDate().substring(arg0.getRetDate().lastIndexOf("-")+1,arg0.getRetDate().length());
-		
 		BookingInfo bookingInfo = new BookingInfo();
+		QFHttpClient httpClient = new QFHttpClient(arg0, false);
+		String[] arr = getIPAndVar(arg0,httpClient);
+		String depDate = arg0.getDepDate().replaceAll("-", "")+"0000";
+		String retDate = arg0.getRetDate().replaceAll("-", "")+"0000";
+		
 		bookingInfo.setAction(bookingUrlPre);
 		bookingInfo.setMethod("post");
 		Map<String, String> map = new LinkedHashMap<String, String>();
-		map.put("tripType", "round_trip");
-		map.put("fromCity", arg0.getDep());
-		map.put("toCityStart", "");
-		map.put("startTimeYM", depYM);
-		map.put("startTimeD", depDD);
-		map.put("fromCityEnd", "");
-		map.put("toCity", arg0.getArr());
-		map.put("endTimeYM", retYM);
-		map.put("endTimeD", retDD);
-		map.put("fareFamily", "ECOFIRST");
-		map.put("passengersADT", "1");
-		map.put("passengersCHD", "0");
-		map.put("passengersINF", "0");
-		map.put("submit", "Book+Flight");
-		map.put("currentLang", "en");
+
+		map.put("ENVIRONMENT", "PRODUCTION_JAT");
+		map.put("LANGUAGE", "GB");
+		map.put("SITE", "BFKCBFKC");
+		map.put("TRIP_FLOW", "YES");
+		map.put("DIRECT_LOGIN", "NO");
+		map.put("portal_var_3", arr[0]+"%7C%7CGlobal");
+		map.put("portal_var_4", "1%7C0%7C0%7C0%7C0");
+		map.put("portal_var_5", arr[1]);
+		map.put("TRAVELLER_TYPE_1", "ADT");
+		map.put("COMMERCIAL_FARE_FAMILY_1", "ECOFIRST");
+		map.put("PRICING_TYPE", "O");
+		map.put("DISPLAY_TYPE", "1");
+		map.put("EXTERNAL_ID", "booking");
+		map.put("SO_SITE_MOP_CALL_ME", "FALSE");
+		map.put("SO_SITE_MOP_CREDIT_CARD", "FALSE");
+		map.put("SO_SITE_BOOL_ISSUE_ETKT", "TRUE");
+		map.put("SO_SITE_ALLOW_SERVICE_FEE", "0");
+		map.put("SO_SITE_MOP_EXT", "TRUE");
+		map.put("SO_SITE_EXT_PSPURL", "https%3A%2F%2Fpayment.airserbia.com%2Fenter.php");
+		map.put("SO_SITE_EXT_PSPCODE", "airserbia");
+		map.put("SO_SITE_EXT_PSPTYPE", "HTML");
+		map.put("SO_SITE_EXT_MERCHANTID", "DEJAT007");
+		map.put("B_DATE_1", depDate);
+		map.put("B_ANY_TIME_1", "TRUE");
+		map.put("B_DATE_2", retDate);
+		map.put("TRIP_TYPE", "R");
+		map.put("B_ANY_TIME_2", "TRUE");
+		map.put("E_LOCATION_2", "");
+		map.put("B_LOCATION_2", "");
+		map.put("B_LOCATION_1", arg0.getDep());
+		map.put("E_LOCATION_1", arg0.getArr());
+		map.put("ARRANGE_BY", "D");
+		
+		
 		bookingInfo.setInputs(map);
 		bookingResult.setData(bookingInfo);
 		bookingResult.setRet(true);
@@ -169,7 +189,7 @@ public class Wrapper_gjsairju001 implements QunarCrawler {
 			}
 		}
 		//从html网页里把ip值截取出来
-		if(html.indexOf("wrong data") != -1){
+		if(null != html && html.indexOf("wrong data") != -1){
 			return null;
 		}else{
 			String ip = org.apache.commons.lang.StringUtils.substringBetween(
@@ -272,7 +292,7 @@ public class Wrapper_gjsairju001 implements QunarCrawler {
 				return result;			
 			}		
 			//需要有明显的提示语句，才能判断是否INVALID_DATE|INVALID_AIRLINE|NO_RESULT
-			if (html.indexOf("wrong data") != -1) {
+			if (null != html && html.indexOf("wrong data") != -1) {
 				result.setRet(false);
 				result.setStatus(Constants.INVALID_DATE);
 				return result;			
