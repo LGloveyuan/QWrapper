@@ -75,50 +75,55 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 
 	@Override
 	public BookingResult getBookingInfo(FlightSearchParam arg0) {
-		String bookingUrlPre = "http://www.airserbia.com/booking.php";
-		BookingResult bookingResult = new BookingResult();
-		
-		String ym = arg0.getDepDate().substring(0, arg0.getDepDate().lastIndexOf("-"));
-		String dd = arg0.getDepDate().substring(arg0.getDepDate().lastIndexOf("-")+1,arg0.getDepDate().length());
-		
-		BookingInfo bookingInfo = new BookingInfo();
-		bookingInfo.setAction(bookingUrlPre);
-		bookingInfo.setMethod("post");
-		Map<String, String> map = new LinkedHashMap<String, String>();
-		map.put("ENVIRONMENT", "PRODUCTION_JAT");
-		map.put("EMBEDDED_TRANSACTION", "FlexPricerAvailability");
-		map.put("LANGUAGE", "GB");
-		map.put("SITE", "BFKCBFKC");
-		map.put("TRIP_FLOW", "YES");
-		map.put("DIRECT_LOGIN", "NO");
-		map.put("portal_var_3", arr[0]+"%7C%7CGlobal");
-		map.put("portal_var_4", "1%7C0%7C0%7C0%7C0");
-		map.put("portal_var_5", arr[1]);
-		map.put("TRAVELLER_TYPE_1", "ADT");
-		map.put("COMMERCIAL_FARE_FAMILY_1", "ECOFIRST");
-		map.put("PRICING_TYPE", "O");
-		map.put("DISPLAY_TYPE", "1");
-		map.put("EXTERNAL_ID", "booking");
-		map.put("SO_SITE_MOP_CALL_ME", "FALSE");
-		map.put("SO_SITE_MOP_CREDIT_CARD", "FALSE");
-		map.put("SO_SITE_BOOL_ISSUE_ETKT", "TRUE");
-		map.put("SO_SITE_ALLOW_SERVICE_FEE", "0");
-		map.put("SO_SITE_MOP_EXT", "TRUE");
-		map.put("SO_SITE_EXT_PSPURL", "https%3A%2F%2Fpayment.airserbia.com%2Fenter.php");
-		map.put("SO_SITE_EXT_PSPCODE", "airserbia");
-		map.put("SO_SITE_EXT_PSPTYPE", "HTML");
-		map.put("SO_SITE_EXT_MERCHANTID", "DEJAT007");
-		map.put("B_DATE_1", dateString);
-		map.put("B_ANY_TIME_1", "TRUE");
-		map.put("TRIP_TYPE", "O");
-		map.put("B_LOCATION_1", arg0.getDep());
-		map.put("E_LOCATION_1", arg0.getArr());
-		map.put("ARRANGE_BY", "D");
-		bookingInfo.setInputs(map);
-		bookingResult.setData(bookingInfo);
-		bookingResult.setRet(true);
-		return bookingResult;
-	}
+		//	String bookingUrlPre = "http://www.airserbia.com/booking.php";
+			String bookingUrlPre = "http://book.airserbia.com/plnext/AirSERBIA/Override.action";
+			BookingResult bookingResult = new BookingResult();
+			
+			String ym = arg0.getDepDate().substring(0, arg0.getDepDate().lastIndexOf("-"));
+			String dd = arg0.getDepDate().substring(arg0.getDepDate().lastIndexOf("-")+1,arg0.getDepDate().length());
+			
+			String dateString = arg0.getDepDate().replaceAll("-", "")+"0000";
+			QFHttpClient httpClient = new QFHttpClient(arg0, false);
+			String[] arr = getIPAndVar(arg0,httpClient);
+			BookingInfo bookingInfo = new BookingInfo();
+			bookingInfo.setAction(bookingUrlPre);
+			bookingInfo.setMethod("post");
+			Map<String, String> map = new LinkedHashMap<String, String>();
+			
+			map.put("ENVIRONMENT", "PRODUCTION_JAT");
+			map.put("EMBEDDED_TRANSACTION", "FlexPricerAvailability");
+			map.put("LANGUAGE", "GB");
+			map.put("SITE", "BFKCBFKC");
+			map.put("TRIP_FLOW", "YES");
+			map.put("DIRECT_LOGIN", "NO");
+			map.put("portal_var_3", arr[0]+"%7C%7CGlobal");
+			map.put("portal_var_4", "1%7C0%7C0%7C0%7C0");
+			map.put("portal_var_5", arr[1]);
+			map.put("TRAVELLER_TYPE_1", "ADT");
+			map.put("COMMERCIAL_FARE_FAMILY_1", "ECOFIRST");
+			map.put("PRICING_TYPE", "O");
+			map.put("DISPLAY_TYPE", "1");
+			map.put("EXTERNAL_ID", "booking");
+			map.put("SO_SITE_MOP_CALL_ME", "FALSE");
+			map.put("SO_SITE_MOP_CREDIT_CARD", "FALSE");
+			map.put("SO_SITE_BOOL_ISSUE_ETKT", "TRUE");
+			map.put("SO_SITE_ALLOW_SERVICE_FEE", "0");
+			map.put("SO_SITE_MOP_EXT", "TRUE");
+			map.put("SO_SITE_EXT_PSPURL", "https%3A%2F%2Fpayment.airserbia.com%2Fenter.php");
+			map.put("SO_SITE_EXT_PSPCODE", "airserbia");
+			map.put("SO_SITE_EXT_PSPTYPE", "HTML");
+			map.put("SO_SITE_EXT_MERCHANTID", "DEJAT007");
+			map.put("B_DATE_1", dateString);
+			map.put("B_ANY_TIME_1", "TRUE");
+			map.put("TRIP_TYPE", "O");
+			map.put("B_LOCATION_1", arg0.getDep());
+			map.put("E_LOCATION_1", arg0.getArr());
+			map.put("ARRANGE_BY", "D");
+			bookingInfo.setInputs(map);
+			bookingResult.setData(bookingInfo);
+			bookingResult.setRet(true);
+			return bookingResult;
+		}
 
 	@Override
 	public String getHtml(FlightSearchParam arg0) {
