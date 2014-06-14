@@ -81,6 +81,7 @@ public class Wrapper_gjsairju001 implements QunarCrawler {
 		Map<String, String> map = new LinkedHashMap<String, String>();
 
 		map.put("ENVIRONMENT", "PRODUCTION_JAT");
+		map.put("EMBEDDED_TRANSACTION", "FlexPricerAvailability");
 		map.put("LANGUAGE", "GB");
 		map.put("SITE", "BFKCBFKC");
 		map.put("TRIP_FLOW", "YES");
@@ -112,7 +113,6 @@ public class Wrapper_gjsairju001 implements QunarCrawler {
 		map.put("B_LOCATION_1", arg0.getDep());
 		map.put("E_LOCATION_1", arg0.getArr());
 		map.put("ARRANGE_BY", "D");
-		
 		
 		bookingInfo.setInputs(map);
 		bookingResult.setData(bookingInfo);
