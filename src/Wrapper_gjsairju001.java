@@ -485,7 +485,7 @@ public class Wrapper_gjsairju001 implements QunarCrawler {
 	 */
 	private FlightDetail getFlightDetail(FlightDetail flightDetail,JSONArray jsonArray,JSONObject ojson,FlightSearchParam arg1) throws ParseException{
 		if(jsonArray.size() >= 0){
-			JSONObject priceJson = jsonArray.getJSONObject(0);
+			JSONObject priceJson = jsonArray.getJSONObject(1);
 			flightDetail.setDepdate(getDate(arg1.getDepDate()));
 			flightDetail.setMonetaryunit(JSON.parseObject(priceJson.getString("currency")).getString("code"));
 			flightDetail.setPrice(priceJson.getDouble("total_amount"));
