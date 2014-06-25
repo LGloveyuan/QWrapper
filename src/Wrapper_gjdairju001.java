@@ -348,7 +348,7 @@ public class Wrapper_gjdairju001 implements QunarCrawler {
 				if(djson.size() >= 0){
 					JSONArray jsonArray = JSON.parseArray(djson.getJSONObject(i).getString("list_trip_price"));
 					if(jsonArray.size() >= 0){
-						JSONObject priceJson = jsonArray.getJSONObject(0);
+						JSONObject priceJson = jsonArray.getJSONObject(1);
 					//	flightDetail.setDepdate(ojson.getDate("b_date_date"));
 						flightDetail.setDepdate(getDate(arg1.getDepDate()));
 						flightDetail.setFlightno(flightNoList);
