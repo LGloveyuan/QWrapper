@@ -1,5 +1,3 @@
-package com.gwn.test;
-
 import java.io.FileWriter;
 import java.text.Format;
 import java.text.ParseException;
