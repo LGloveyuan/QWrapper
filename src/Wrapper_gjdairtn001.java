@@ -1,5 +1,3 @@
-package com.gwn.test;
-
 import java.text.Format;
 import java.text.ParseException;
 import java.text.ParsePosition;
