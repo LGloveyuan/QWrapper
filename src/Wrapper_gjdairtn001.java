@@ -1,4 +1,5 @@
-import java.io.FileWriter;
+package com.gwn.test;
+
 import java.text.Format;
 import java.text.ParseException;
 import java.text.ParsePosition;
@@ -38,8 +39,8 @@ import com.qunar.qfwrapper.util.QFPostMethod;
 
 /**
  * 
- * @ClassName: Wrapper_gjdairju001
- * @Description: 澶ф邯鍦拌埅绌哄崟绋嬫満绁ㄦ姄鍙�
+ * @ClassName: Wrapper_gjdairtn001
+ * @Description: 大溪地航空单程机票抓取
  * @author: LG
  * @date 2014-6-5
  *
@@ -51,10 +52,12 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 	public static final int GET = 1;
 
 	public static final String HOME_URL = "http://www.airtahitinui.com.au/";
+	
+	private static Map citys = new HashMap<String, String>();
 
 	public static void main(String[] args) {
 
-		// 鎼滅储鏉′欢璁剧疆
+		// 搜索条件设置
 		FlightSearchParam searchParam = new FlightSearchParam();
 		searchParam.setDep("LAX");
 		searchParam.setArr("MEL"); // CDG
@@ -62,12 +65,15 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		searchParam.setTimeOut("60000");
 		searchParam.setToken("");
 		searchParam.setWrapperid("gjdairtn001");
-		// 鑾峰彇鎼滅储椤甸潰
+		
+		generateCity(citys);
+		
+		// 获取搜索页面
 		String html = new Wrapper_gjdairtn001().getHtml(searchParam);
 		System.out.println("HTML: " + html);
 
 		ProcessResultInfo result = new ProcessResultInfo();
-		// 淇℃伅鎶撳彇
+		// 信息抓取
 		result = new Wrapper_gjdairtn001().process(html, searchParam);
 
 		if (result.isRet() && result.getStatus().equals(Constants.SUCCESS)) {
@@ -210,7 +216,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 
 			return get;
 		} else {
-			throw new Exception("Http method 涓嶆敮鎸�");
+			throw new Exception("Http method 不支持!");
 		}
 	}
 
@@ -257,7 +263,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		String depDate = null;
 		String arrDate = null;
 		String monUnit = "USD";
-		// 鑾峰彇鏈�綆浠锋牸
+		// 获取最低价格
 		float price = Float.MAX_VALUE;
 		float temp_price = Float.MAX_VALUE;
 
@@ -278,7 +284,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 			return result;
 		}
 
-		// 鎼滅储姣忔潯涓浆绾胯矾鐨勮埅鐝俊鎭�
+		// 搜索每条中转线路的航班信息
 		String[] str = html.split("<trid=rowFM_0_[0-9]_0");
 		for (int i = 0; i < str.length; i++) {
 			System.out.println("record" + i + ": " + str[i]);
@@ -306,7 +312,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 				String info = m1.group(1);
 
 				System.out.println("filght info: " + info);
-				// 鎴彇姣忔潯鑸彮淇℃伅鐨勫嚭鍙戝煄甯傚拰鍒拌揪鍩庡競
+				// 截取每条航班信息的出发城市和到达城市
 				String regx2 = "\\<tdclass=step2CellflightInfo_middle>(.*?)\\<br/>";
 				Pattern p2 = Pattern.compile(regx2);
 				Matcher m2 = p2.matcher(info);
@@ -319,13 +325,15 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 						arrPort = processPort(port);
 					j++;
 				}
-				// 鎴彇鑸彮鍒楄〃
+				// 截取航班列表
 				flightNo = org.apache.commons.lang.StringUtils
 						.substringBetween(info, "", "</span>");
 				flightNos.add(flightNo);
 				System.out.println("fightNo: " + flightNo);
+				System.out.println("depPort: " + depPort);
+				System.out.println("arrPort: " + arrPort);
 
-				// 鎴彇鍑哄彂鏃堕棿鍜屽埌杈炬椂闂�
+				// 截取出发时间和到达时间
 				String regx3 = "\\<br/>(.*?)\\</td>";
 				Pattern p3 = Pattern.compile(regx3);
 				Matcher m3 = p3.matcher(info);
@@ -339,14 +347,14 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 					k--;
 				}
 				System.out.println("depTime: " + depTime);
-				if (x != 0) { // 绗竴鏉¤埅鐝殑鍒拌揪鏃堕棿澶勭悊涓庡叾浠栦笉鍚�
+				if (x != 0) { // 第一条航班的到达时间处理与其他不同
 					arrTime = info.substring(info.length() - 8, info.length());
 				}
 				System.out.println("arrTime: " + arrTime);
 				x++;
 
-				seg.setDepairport(depPort);
-				seg.setArrairport(arrPort);
+				seg.setDepairport((String)citys.get(depPort));
+				seg.setArrairport((String)citys.get(arrPort));
 				seg.setDeptime(processTime(depTime));
 				seg.setArrtime(processTime(arrTime));
 				seg.setFlightno(flightNo);
@@ -390,7 +398,6 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 
 	}
 	
-
 	public static String processPort(String port) {
 		if (port.contains("<b>")) {
 			return port.substring(3, port.length() - 4);
@@ -462,6 +469,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		ParsePosition pos = new ParsePosition(0);
 		Date strtodate = formatter.parse(strDate, pos);
+		System.out.println("stroDate: " + strtodate);
 		return strtodate;
 	}
 
@@ -498,6 +506,53 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		}
 		int sub = week - current_day;
 		return (sub + 7) % 7;
+	}
+	
+	private static void generateCity(Map citys)
+	{
+		citys.put("Sydney", "SYD");citys.put("Melbourne", "MEL");
+		citys.put("Brisbane", "BNE");citys.put("LosAngeles", "LAX");
+		citys.put("Adelaide", "ADL");citys.put("Cairns", "CNS");
+		citys.put("Darwin", "DRW");citys.put("Perth", "PER");
+		citys.put("Canberra", "CBR");citys.put("Tikehau", "TIH");
+		citys.put("Manihi", "XMH");citys.put("Atlanta,GA", "ATL");
+		citys.put("Austin,TX", "AUS");citys.put("Boston,MA", "BOS");
+		citys.put("Charlotte,NC", "CLT");citys.put("Phoenix,AZ", "PHX");
+		citys.put("Portland,OR", "PDX");citys.put("Reno,NV", "RNO");
+		citys.put("SaltLakeCity,UT", "SLC");citys.put("SanDiego,CA", "SAN");
+		citys.put("SanFrancisco,CA", "SFO");citys.put("SanJose,CA", "SJC");
+		citys.put("SantaBarbara,CA", "SBA");citys.put("Marseille", "MRS");
+		citys.put("MarseilleTGV", "XRF");citys.put("MetzLorraineTGV", "XZI");
+		citys.put("Montpellier", "MPL");citys.put("MontpellierTGV", "XPJ");
+		citys.put("Nantes", "NTE");citys.put("NantesTGV", "QJZ");
+		citys.put("Nice", "NCE");citys.put("Chicago,IL", "ORD");
+		citys.put("Seattle,WA", "SEA");citys.put("GoldCoast", "OOL");
+		citys.put("Cincinnati,OH", "CVG");citys.put("St.Louis,MO", "STL");
+		citys.put("Auckland", "AKL");citys.put("Christchurch", "CHC");
+		citys.put("Wellington", "WLG");citys.put("Queenstown", "ZQN");
+		citys.put("Dallas,TX", "DFW");citys.put("Denver,CO", "DEN");
+		citys.put("Detroit,MI", "DTW");citys.put("Ft.Lauderdale,FL", "FLL");
+		citys.put("Honolulu,HI", "HNL");citys.put("Washington,DC", "WAS");
+		citys.put("Paris", "CDG");citys.put("AixenprovenceTGV", "QXB");
+		citys.put("AngersTGV", "QXG");citys.put("NimesTGV", "ZYN");
+		citys.put("Pau", "PUF");citys.put("PoitiersTGV", "XOP");
+		citys.put("ReimsTGV", "XIZ");citys.put("RennesTGV", "ZFJ");
+		citys.put("Strasbourg", "SXB");citys.put("StrasbourgTGV", "XWG");
+		citys.put("Philadelphia,PA", "PHL");citys.put("Papeete", "PPT");
+		citys.put("BoraBora", "BOB");citys.put("Fakarava", "FAV");
+		citys.put("Huahine", "HUH");citys.put("Moorea", "MOZ");
+		citys.put("Raiatea", "RFP");citys.put("Rangiroa", "RGI");
+		citys.put("Houston,TX", "IAH");citys.put("LasVegas,NV", "LAS");
+		citys.put("Memphis,TN", "MEM");citys.put("Miami,FL", "MIA");
+		citys.put("Minneapolis,MN", "MSP");citys.put("NewYork,NY", "NYC");
+		citys.put("Orlando,FL", "ORL");citys.put("AvignonTGV", "AVN");
+		citys.put("Brest", "BES");citys.put("Bordeaux", "BOD");
+		citys.put("BordeauxTGV", "ZFQ");citys.put("LeMansTGV", "ZLN");
+		citys.put("LilleTGV", "XDB");citys.put("Lyon", "LYS");
+		citys.put("LyonTGV", "XYD");citys.put("ToulonTGV", "XZV");
+		citys.put("Toulouse", "TLS");citys.put("ToursTGV", "XSH");
+		citys.put("ValenceTGV", "XHK");citys.put("Tokyo", "NRT");
+		citys.put("Tahiti–Papeete", "PPT");
 	}
 
 	public static String SEARCH_FLIGHT_URL = "https://secure.airtahitinui.com/OnlineBooking.aspx";
