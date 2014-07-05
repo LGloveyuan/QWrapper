@@ -1,3 +1,5 @@
+import java.text.Format;
+import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -5,7 +7,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,12 +59,12 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		FlightSearchParam searchParam = new FlightSearchParam();
 		searchParam.setDep("LAX");
 		searchParam.setArr("MEL"); // CDG
-		searchParam.setDepDate("2014-08-18");
+		searchParam.setDepDate("2014-08-20");
 		searchParam.setTimeOut("60000");
 		searchParam.setToken("");
 		searchParam.setWrapperid("gjdairtn001");
 		
-		//generateCity(citys);
+		generateCity(citys);
 		
 		// 获取搜索页面
 		String html = new Wrapper_gjdairtn001().getHtml(searchParam);
@@ -111,6 +115,8 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 					SEARCH_FLIGHT_URL, getSearchParamMapForSingle(searchParam));
 
 			System.out.println("htmlAll: " + html);
+			if(html.contains("Sorry. There are no flights available that meet your request. Please try an alternative date."))
+			{return "invalid_date";}
 			String htmlResult = org.apache.commons.lang.StringUtils
 					.substringBetween(html, "<tr id=\"rowFM_0_0_0\"",
 							"<td colspan=\"9\">");
@@ -152,7 +158,8 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 			GetMethod get1 = new QFGetMethod(SEARCH_FLIGHT_URL);
 			System.out.println(httpMethod.getStatusCode());
 
-			httpMethod.setFollowRedirects(true);
+//			httpMethod.setFollowRedirects(true);
+			httpMethod.setFollowRedirects(false);
 			String cookie = StringUtils.join(client.getState().getCookies(),
 					"; ");
 			System.out.println("cookie: " + cookie);
@@ -210,7 +217,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 
 			return get;
 		} else {
-			throw new Exception("Http method 不支持!");
+			throw new Exception("Http method invalid!");
 		}
 	}
 
@@ -225,7 +232,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 
 		param.put("depart", searchParam.getDep());
 		param.put("dest.1", searchParam.getArr());
-		param.put("trip_type", "return");
+		param.put("trip_type", "one%20way");
 		// param.put("date.0","14Aug"); //5Jul
 		param.put("date.0", processDate(searchParam.getDepDate()));
 		param.put("date.1", processDate(searchParam.getDepDate()));
@@ -242,10 +249,10 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 	}
 
 	public ProcessResultInfo process(String arg0, FlightSearchParam arg1) {
-		generateCity(citys);
+                generateCity(citys);
 		String html = arg0;
 		System.out.println("process html: " + html);
-		html = html.replaceAll("[\\s\"]", "");
+		if(null!=html)html = html.replaceAll("[\\s\"]", "");
 		System.out.println("newHtml: " + html);
 		FlightSearchParam serachParam = arg1;
 
@@ -258,8 +265,8 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		String arrDate = null;
 		String monUnit = "USD";
 		// 获取最低价格
-		double price = Double.MAX_VALUE;
-		double temp_price = Double.MAX_VALUE;
+		float price = Float.MAX_VALUE;
+		float temp_price = Float.MAX_VALUE;
 
 		List<FlightSegement> segs = null;
 		List<String> flightNos = null;
@@ -277,32 +284,41 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 			result.setStatus(Constants.CONNECTION_FAIL);
 			return result;
 		}
+		
+		if ("invalid_date".equals(html)) {
+			result.setRet(false);
+			result.setStatus(Constants.INVALID_DATE);
+			return result;
+		}
 
 		// 搜索每条中转线路的航班信息
 		String[] str = html.split("<trid=rowFM_0_[0-9]_0");
 		for (int i = 0; i < str.length; i++) {
 			System.out.println("record" + i + ": " + str[i]);
 
-		/*	temp_price = Float.parseFloat(org.apache.commons.lang.StringUtils
+			/*
+			temp_price = Float.parseFloat(org.apache.commons.lang.StringUtils
 					.substringBetween(html, "USD<br/>", "</label>").replaceAll(
-							",", ""));*/
-			String _price = org.apache.commons.lang.StringUtils.substringBetween(html, "USD<br/>", "</label>");
-			if(!"N/A".equals(_price) && null != _price){
-				temp_price = Double.parseDouble(_price.replaceAll(",", ""));
-				if (temp_price >= price)
-					continue;
-				price = temp_price;
-			}else{
-				price = 0.0;
+							",", ""));
+							*/
+			String _price = org.apache.commons.lang.StringUtils
+					.substringBetween(html, "USD<br/>", "</label>");
+			if(!"N/A".equals(_price)&&null!=_price)
+			{
+				System.out.println("_price: " + _price);
+				temp_price = Float.parseFloat(_price.replaceAll(",", ""));
 			}
+			else{continue;}
 			
-			
+			if (temp_price >= price)
+				continue;
 
 			if (null != segs)
 				segs.clear();
 			if (null != flightNos)
 				flightNos.clear();
 			flightDetail = new FlightDetail();
+			price = temp_price;
 			String regx1 = "\\<spanclass='FlightNumberInTable'>(.*?)\\</td></tr>";
 			System.out.println("regx: " + regx1);
 			Pattern p1 = Pattern.compile(regx1);
@@ -354,11 +370,9 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 				}
 				System.out.println("arrTime: " + arrTime);
 				x++;
-				String depPortParam=depPort.replaceAll("(^\\s{1,})|(\\s{1,}$)", "");
-				String arrPortParam=arrPort.replaceAll("(^\\s{1,})|(\\s{1,}$)", "");
-				System.out.println("depPortParam:"+depPortParam);
-				seg.setDepairport(citys.get(depPortParam).toString());
-				seg.setArrairport((String)citys.get(arrPortParam));
+
+				seg.setDepairport((String)citys.get(depPort));
+				seg.setArrairport((String)citys.get(arrPort));
 				seg.setDeptime(processTime(depTime));
 				seg.setArrtime(processTime(arrTime));
 				seg.setFlightno(flightNo);
@@ -382,6 +396,12 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		baseFlight.setDetail(flightDetail);
 		baseFlight.setInfo(segs);
 		flightLists.add(baseFlight);
+		
+		if(baseFlight.getDetail().getFlightno().isEmpty()){
+			result.setRet(false);
+			result.setStatus(Constants.NO_RESULT);
+			return result;
+		}
 
 		result.setRet(true);
 		result.setStatus(Constants.SUCCESS);
