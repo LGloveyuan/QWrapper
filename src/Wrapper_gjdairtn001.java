@@ -246,8 +246,8 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 	}
 
 	public ProcessResultInfo process(String arg0, FlightSearchParam arg1) {
-
-		String html = arg0;
+                generateCity(citys);
+ 		String html = arg0;
 		System.out.println("process html: " + html);
 		html = html.replaceAll("[\\s\"]", "");
 		System.out.println("newHtml: " + html);
