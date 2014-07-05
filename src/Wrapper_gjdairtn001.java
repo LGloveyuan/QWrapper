@@ -351,8 +351,11 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 				System.out.println("arrTime: " + arrTime);
 				x++;
 
-				seg.setDepairport((String)citys.get(depPort));
-				seg.setArrairport((String)citys.get(arrPort));
+			        String depPortParam=depPort.replaceAll("(^\\s{1,})|(\\s{1,}$)", "");
+				String arrPortParam=arrPort.replaceAll("(^\\s{1,})|(\\s{1,}$)", "");
+				System.out.println("depPortParam:"+depPortParam);
+				seg.setDepairport((String)citys.get(depPortParam));
+				seg.setArrairport((String)citys.get(arrPortParam));
 				seg.setDeptime(processTime(depTime));
 				seg.setArrtime(processTime(arrTime));
 				seg.setFlightno(flightNo);
