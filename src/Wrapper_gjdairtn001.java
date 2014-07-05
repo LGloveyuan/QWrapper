@@ -1,5 +1,3 @@
-import java.text.Format;
-import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -7,9 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,12 +55,12 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		FlightSearchParam searchParam = new FlightSearchParam();
 		searchParam.setDep("LAX");
 		searchParam.setArr("MEL"); // CDG
-		searchParam.setDepDate("2014-08-14");
+		searchParam.setDepDate("2014-08-18");
 		searchParam.setTimeOut("60000");
 		searchParam.setToken("");
 		searchParam.setWrapperid("gjdairtn001");
 		
-		generateCity(citys);
+		//generateCity(citys);
 		
 		// 获取搜索页面
 		String html = new Wrapper_gjdairtn001().getHtml(searchParam);
@@ -246,8 +242,8 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 	}
 
 	public ProcessResultInfo process(String arg0, FlightSearchParam arg1) {
-                generateCity(citys);
- 		String html = arg0;
+		generateCity(citys);
+		String html = arg0;
 		System.out.println("process html: " + html);
 		html = html.replaceAll("[\\s\"]", "");
 		System.out.println("newHtml: " + html);
@@ -262,8 +258,8 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		String arrDate = null;
 		String monUnit = "USD";
 		// 获取最低价格
-		float price = Float.MAX_VALUE;
-		float temp_price = Float.MAX_VALUE;
+		double price = Double.MAX_VALUE;
+		double temp_price = Double.MAX_VALUE;
 
 		List<FlightSegement> segs = null;
 		List<String> flightNos = null;
@@ -287,18 +283,26 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		for (int i = 0; i < str.length; i++) {
 			System.out.println("record" + i + ": " + str[i]);
 
-			temp_price = Float.parseFloat(org.apache.commons.lang.StringUtils
+		/*	temp_price = Float.parseFloat(org.apache.commons.lang.StringUtils
 					.substringBetween(html, "USD<br/>", "</label>").replaceAll(
-							",", ""));
-			if (temp_price >= price)
-				continue;
+							",", ""));*/
+			String _price = org.apache.commons.lang.StringUtils.substringBetween(html, "USD<br/>", "</label>");
+			if(!"N/A".equals(_price) && null != _price){
+				temp_price = Double.parseDouble(_price.replaceAll(",", ""));
+				if (temp_price >= price)
+					continue;
+				price = temp_price;
+			}else{
+				price = 0.0;
+			}
+			
+			
 
 			if (null != segs)
 				segs.clear();
 			if (null != flightNos)
 				flightNos.clear();
 			flightDetail = new FlightDetail();
-			price = temp_price;
 			String regx1 = "\\<spanclass='FlightNumberInTable'>(.*?)\\</td></tr>";
 			System.out.println("regx: " + regx1);
 			Pattern p1 = Pattern.compile(regx1);
@@ -350,11 +354,10 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 				}
 				System.out.println("arrTime: " + arrTime);
 				x++;
-
-			        String depPortParam=depPort.replaceAll("(^\\s{1,})|(\\s{1,}$)", "");
+				String depPortParam=depPort.replaceAll("(^\\s{1,})|(\\s{1,}$)", "");
 				String arrPortParam=arrPort.replaceAll("(^\\s{1,})|(\\s{1,}$)", "");
 				System.out.println("depPortParam:"+depPortParam);
-				seg.setDepairport((String)citys.get(depPortParam));
+				seg.setDepairport(citys.get(depPortParam).toString());
 				seg.setArrairport((String)citys.get(arrPortParam));
 				seg.setDeptime(processTime(depTime));
 				seg.setArrtime(processTime(arrTime));
