@@ -1,5 +1,3 @@
-import java.text.Format;
-import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -7,9 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,7 +33,7 @@ import com.qunar.qfwrapper.util.QFPostMethod;
 
 /**
  * 
- * @ClassName: Wrapper_gjdairtn001
+ * @ClassName: Wrapper_gjdairju001
  * @Description: 大溪地航空单程机票抓取
  * @author: LG
  * @date 2014-6-5
