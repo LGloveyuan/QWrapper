@@ -1,4 +1,4 @@
-import java.io.FileWriter;
+
 import java.text.Format;
 import java.text.ParseException;
 import java.text.ParsePosition;
@@ -39,7 +39,7 @@ import com.qunar.qfwrapper.util.QFPostMethod;
 /**
  * 
  * @ClassName: Wrapper_gjdairju001 
- * @Description:  鍙岀▼鏈虹エ鎶撳彇
+ * @Description:  双程机票抓取
  * @author: LG
  * @date 2014-6-5 
  *
@@ -53,6 +53,8 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 	
 	public static final String HOME_URL = "http://www.airtahitinui.com.au/";
 	
+	private static Map citys = new HashMap<String, String>();
+	
 	public static void main(String[] args) {
 
 		FlightSearchParam searchParam = new FlightSearchParam();
@@ -63,6 +65,8 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 		searchParam.setTimeOut("60000");
 		searchParam.setToken("");
 		searchParam.setWrapperid("gjsairtn001");
+		
+		generateCity(citys);
 
 		String html = new Wrapper_gjsairtn001().getHtml(searchParam);
 		System.out.println("HTML: " + html);
@@ -200,13 +204,13 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 	              result.append(param.getValue());
 			}
 			String allUrl = uri.indexOf("?") > 0 ? (uri + "&" + result) : (uri + "?" + result);
-			System.out.println(allUrl);
+			System.out.println("alllUrl: " + allUrl);
 	
 			GetMethod get = new QFGetMethod(allUrl);
 		
 			return get;
 		} else {
-			throw new Exception("Http method 濞戞挸绉甸弫顕�箰閿燂拷");
+			throw new Exception("Http method invalid!");
 		}
 	}
 	
@@ -220,8 +224,8 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 		param.put("depart",searchParam.getDep());
 		param.put("dest.1",searchParam.getArr());
 		param.put("trip_type","return");
-		param.put("date.0",processDate(searchParam.getDepDate())); 
-		param.put("date.1",processDate(searchParam.getRetDate())); 
+		param.put("date.0", processDate(searchParam.getDepDate())); 
+		param.put("date.1", processDate(searchParam.getRetDate())); 
 		param.put("persons.0","1");
 		param.put("persons.1","0");
 		param.put("persons.2","0");
@@ -236,6 +240,8 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 	
 	
 	public ProcessResultInfo process(String html, FlightSearchParam arg1) {
+
+		generateCity(citys);
 		
 		String departure_html = org.apache.commons.lang.StringUtils.substringBetween(html, "DEPARTURE FLIGHT OPTIONS", "Clear Selection");
 		String return_html = org.apache.commons.lang.StringUtils.substringBetween(html, "RETURN FLIGHT OPTIONS", "Clear Selection");
@@ -272,6 +278,13 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 			result.setStatus(Constants.CONNECTION_FAIL);
 			return result;
 		}
+		
+		if(html.contains("Sorry. There are no flights available that meet your request. Please try an alternative date."))
+		{
+			result.setRet(false);
+			result.setStatus(Constants.INVALID_DATE);
+			return result;
+		}
         
         new Wrapper_gjsairtn001().subProcess(departure_html, departure_segs, departure_flightNos, departure_flightDetail, 0, serachParam);
         new Wrapper_gjsairtn001().subProcess(return_html, return_segs, return_flightNos, return_flightDetail, 1, serachParam);
@@ -296,6 +309,12 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
         
         roundList.add(baseFlight);
         
+        if(departure_flightDetail.getFlightno().isEmpty() || return_flightDetail.getFlightno().isEmpty()){
+			result.setRet(false);
+			result.setStatus(Constants.NO_RESULT);
+			return result;
+		}
+    
 		result.setRet(true);
 		result.setStatus(Constants.SUCCESS);
 		result.setData(roundList);
@@ -332,7 +351,16 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 		  {
 			  System.out.println("record" + i + ": " + str[i]);
 			  
-			  temp_price = Float.parseFloat(org.apache.commons.lang.StringUtils.substringBetween(html, "USD<br/>", "</label>").replaceAll(",", "")); 
+			  //temp_price = Float.parseFloat(org.apache.commons.lang.StringUtils.substringBetween(html, "USD<br/>", "</label>").replaceAll(",", "")); 
+			  String _price = org.apache.commons.lang.StringUtils
+						.substringBetween(html, "USD<br/>", "</label>");
+				if(!"N/A".equals(_price)&&null!=_price)
+				{
+					System.out.println("_price: " + _price);
+					temp_price = Float.parseFloat(_price.replaceAll(",", ""));
+				}
+				else{continue;}
+				
 			  if(temp_price >= price)continue;
 			  
 			  if(null != segs) segs.clear();
@@ -389,8 +417,8 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 	        	System.out.println("arrTime: " + arrTime);
 	        	x++;
 	        	
-	        	seg.setDepairport(depPort);
-	        	seg.setArrairport(arrPort);
+	        	seg.setDepairport((String) citys.get(depPort));
+	        	seg.setArrairport((String) citys.get(arrPort));
 	        	seg.setDeptime(processTime(depTime));
 	        	seg.setArrtime(processTime(arrTime));
 	        	seg.setFlightno(flightNo);
@@ -432,7 +460,6 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 		
 	}
 	
-
 	public static String processPort(String port) {
 		if (port.contains("<b>")) {
 			return port.substring(3, port.length() - 4);
@@ -542,6 +569,53 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 		return (sub + 7) % 7;
 	}
 	
+	private static void generateCity(Map citys)
+	{
+		citys.put("Sydney", "SYD");citys.put("Melbourne", "MEL");
+		citys.put("Brisbane", "BNE");citys.put("LosAngeles", "LAX");
+		citys.put("Adelaide", "ADL");citys.put("Cairns", "CNS");
+		citys.put("Darwin", "DRW");citys.put("Perth", "PER");
+		citys.put("Canberra", "CBR");citys.put("Tikehau", "TIH");
+		citys.put("Manihi", "XMH");citys.put("Atlanta,GA", "ATL");
+		citys.put("Austin,TX", "AUS");citys.put("Boston,MA", "BOS");
+		citys.put("Charlotte,NC", "CLT");citys.put("Phoenix,AZ", "PHX");
+		citys.put("Portland,OR", "PDX");citys.put("Reno,NV", "RNO");
+		citys.put("SaltLakeCity,UT", "SLC");citys.put("SanDiego,CA", "SAN");
+		citys.put("SanFrancisco,CA", "SFO");citys.put("SanJose,CA", "SJC");
+		citys.put("SantaBarbara,CA", "SBA");citys.put("Marseille", "MRS");
+		citys.put("MarseilleTGV", "XRF");citys.put("MetzLorraineTGV", "XZI");
+		citys.put("Montpellier", "MPL");citys.put("MontpellierTGV", "XPJ");
+		citys.put("Nantes", "NTE");citys.put("NantesTGV", "QJZ");
+		citys.put("Nice", "NCE");citys.put("Chicago,IL", "ORD");
+		citys.put("Seattle,WA", "SEA");citys.put("GoldCoast", "OOL");
+		citys.put("Cincinnati,OH", "CVG");citys.put("St.Louis,MO", "STL");
+		citys.put("Auckland", "AKL");citys.put("Christchurch", "CHC");
+		citys.put("Wellington", "WLG");citys.put("Queenstown", "ZQN");
+		citys.put("Dallas,TX", "DFW");citys.put("Denver,CO", "DEN");
+		citys.put("Detroit,MI", "DTW");citys.put("Ft.Lauderdale,FL", "FLL");
+		citys.put("Honolulu,HI", "HNL");citys.put("Washington,DC", "WAS");
+		citys.put("Paris", "CDG");citys.put("AixenprovenceTGV", "QXB");
+		citys.put("AngersTGV", "QXG");citys.put("NimesTGV", "ZYN");
+		citys.put("Pau", "PUF");citys.put("PoitiersTGV", "XOP");
+		citys.put("ReimsTGV", "XIZ");citys.put("RennesTGV", "ZFJ");
+		citys.put("Strasbourg", "SXB");citys.put("StrasbourgTGV", "XWG");
+		citys.put("Philadelphia,PA", "PHL");citys.put("Papeete", "PPT");
+		citys.put("BoraBora", "BOB");citys.put("Fakarava", "FAV");
+		citys.put("Huahine", "HUH");citys.put("Moorea", "MOZ");
+		citys.put("Raiatea", "RFP");citys.put("Rangiroa", "RGI");
+		citys.put("Houston,TX", "IAH");citys.put("LasVegas,NV", "LAS");
+		citys.put("Memphis,TN", "MEM");citys.put("Miami,FL", "MIA");
+		citys.put("Minneapolis,MN", "MSP");citys.put("NewYork,NY", "NYC");
+		citys.put("Orlando,FL", "ORL");citys.put("AvignonTGV", "AVN");
+		citys.put("Brest", "BES");citys.put("Bordeaux", "BOD");
+		citys.put("BordeauxTGV", "ZFQ");citys.put("LeMansTGV", "ZLN");
+		citys.put("LilleTGV", "XDB");citys.put("Lyon", "LYS");
+		citys.put("LyonTGV", "XYD");citys.put("ToulonTGV", "XZV");
+		citys.put("Toulouse", "TLS");citys.put("ToursTGV", "XSH");
+		citys.put("ValenceTGV", "XHK");citys.put("Tokyo", "NRT");
+		citys.put("Tahiti–Papeete", "PPT");
+
+	}
 	public static String SEARCH_FLIGHT_URL = "https://secure.airtahitinui.com/OnlineBooking.aspx" ;
 
 }
