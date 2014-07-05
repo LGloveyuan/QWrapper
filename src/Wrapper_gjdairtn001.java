@@ -100,7 +100,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 	    BookingInfo bookingInfo = new BookingInfo();
 	    bookingInfo.setAction(SEARCH_FLIGHT_URL);
 	    bookingInfo.setInputs(getSearchParamMapForSingle(arg0));
-	    bookingInfo.setMethod("get");
+	    bookingInfo.setMethod("post");
 	    
 	    bookingResult.setData(bookingInfo);
 	    bookingResult.setRet(true);
