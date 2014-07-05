@@ -73,7 +73,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		ProcessResultInfo result = new ProcessResultInfo();
 		// 信息抓取
 		result = new Wrapper_gjdairtn001().process(html, searchParam);
-
+		 new Wrapper_gjdairtn001().getBookingInfo(searchParam);
 		if (result.isRet() && result.getStatus().equals(Constants.SUCCESS)) {
 			List<OneWayFlightInfo> flightList = (List<OneWayFlightInfo>) result
 					.getData();
@@ -99,9 +99,38 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 	    
 	    BookingInfo bookingInfo = new BookingInfo();
 	    bookingInfo.setAction(SEARCH_FLIGHT_URL);
-	    bookingInfo.setInputs(getSearchParamMapForSingle(arg0));
-	    bookingInfo.setMethod("get");
+	//    bookingInfo.setInputs(getSearchParamMapForSingle(arg0));
+	    Map map = getSearchParamMapForSingle(arg0);
 	    
+	    bookingInfo.setMethod("get");
+	    HttpClient client = getHttp(arg0);
+		HttpMethod httpMethod;
+		try {
+			httpMethod = initMethod(GET, SEARCH_FLIGHT_URL, getSearchParamMapForSingle(arg0));
+			int statusCode = client.executeMethod(httpMethod);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		GetMethod get1 = new QFGetMethod(SEARCH_FLIGHT_URL);
+		String cookie = StringUtils.join(client.getState().getCookies(),
+				"; ");
+		System.out.println("cookie: " + cookie);
+		client.getState().clearCookies();
+		String k1 = "";
+		String v1 = "";
+		String k2 = "";
+		String v2 = "";
+		if(null != cookie){
+			k1 = cookie.substring(0, cookie.indexOf("=")).trim();
+			v1 = cookie.substring(cookie.indexOf("=")+1, cookie.indexOf(";")).trim();
+			k2 = cookie.substring(cookie.indexOf(";")+1, cookie.lastIndexOf("=")).trim();
+			v2 = cookie.substring(cookie.lastIndexOf("=")+1, cookie.length()).trim();
+			System.out.println(v2);
+		}
+		map.put(k1, v1);
+		map.put(k2, v2);
+		bookingInfo.setInputs(map);
 	    bookingResult.setData(bookingInfo);
 	    bookingResult.setRet(true);
 	    
@@ -249,7 +278,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 	}
 
 	public ProcessResultInfo process(String arg0, FlightSearchParam arg1) {
-                generateCity(citys);
+	generateCity(citys);
 		String html = arg0;
 		System.out.println("process html: " + html);
 		if(null!=html)html = html.replaceAll("[\\s\"]", "");
