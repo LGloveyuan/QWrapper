@@ -99,8 +99,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 	    
 	    BookingInfo bookingInfo = new BookingInfo();
 	    bookingInfo.setAction(SEARCH_FLIGHT_URL);
-//	    bookingInfo.setInputs(getSearchParamMapForSingle(arg0));
-            bookingInfo.setInputs(getSearchParamMap1(arg0,false));
+	    bookingInfo.setInputs(getSearchParamMapForSingle1(arg0));
 
 	    bookingInfo.setMethod("get");
 	    
@@ -248,6 +247,11 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		param.put("origin", "AU");
 
 		return param;
+	}
+
+	public static Map<String, String> getSearchParamMapForSingle1(
+			FlightSearchParam searchParam) {
+		return getSearchParamMap1(searchParam, false);
 	}
 
 	private static Map<String, String> getSearchParamMap1(
