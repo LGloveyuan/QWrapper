@@ -99,7 +99,9 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 	    
 	    BookingInfo bookingInfo = new BookingInfo();
 	    bookingInfo.setAction(SEARCH_FLIGHT_URL);
-	    bookingInfo.setInputs(getSearchParamMapForSingle(arg0));
+//	    bookingInfo.setInputs(getSearchParamMapForSingle(arg0));
+            bookingInfo.setInputs(getSearchParamMap1(arg0,false));
+
 	    bookingInfo.setMethod("get");
 	    
 	    bookingResult.setData(bookingInfo);
@@ -248,6 +250,28 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		return param;
 	}
 
+	private static Map<String, String> getSearchParamMap1(
+			FlightSearchParam searchParam, boolean isRound) {
+		Map<String, String> param = new HashMap<String, String>();
+
+		param.put("depart", searchParam.getDep());
+		param.put("dest.1", searchParam.getArr());
+		param.put("trip_type", "one way");
+	//        param.put("trip_type", "one way");
+		param.put("date.0", processDate(searchParam.getDepDate()));
+		param.put("date.1", processDate(searchParam.getDepDate()));
+		param.put("persons.0", "1");
+		param.put("persons.1", "0");
+		param.put("persons.2", "0");
+		param.put("date_flexibility", "fixed");
+		param.put("pricing_type", "lowest%20available");
+		param.put("fare_description", "normal");
+		param.put("travel_class", "E");
+		param.put("origin", "AU");
+
+		return param;
+	}
+	
 	public ProcessResultInfo process(String arg0, FlightSearchParam arg1) {
 	        generateCity(citys);
 	 	String html = arg0;
