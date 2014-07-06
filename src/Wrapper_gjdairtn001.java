@@ -232,15 +232,15 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 
 		param.put("depart", searchParam.getDep());
 		param.put("dest.1", searchParam.getArr());
-	//	param.put("trip_type", "one%20way");
-	        param.put("trip_type", "one way");
+		param.put("trip_type", "one%20way");
+	//        param.put("trip_type", "one way");
 		param.put("date.0", processDate(searchParam.getDepDate()));
 		param.put("date.1", processDate(searchParam.getDepDate()));
 		param.put("persons.0", "1");
 		param.put("persons.1", "0");
 		param.put("persons.2", "0");
 		param.put("date_flexibility", "fixed");
-		param.put("pricing_type", "lowest available");
+		param.put("pricing_type", "lowest%20available");
 		param.put("fare_description", "normal");
 		param.put("travel_class", "E");
 		param.put("origin", "AU");
