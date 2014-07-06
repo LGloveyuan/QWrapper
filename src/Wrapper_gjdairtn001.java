@@ -232,8 +232,8 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 
 		param.put("depart", searchParam.getDep());
 		param.put("dest.1", searchParam.getArr());
-		param.put("trip_type", "one%20way");
-		// param.put("date.0","14Aug"); //5Jul
+	//	param.put("trip_type", "one%20way");
+	        param.put("trip_type", "one way");
 		param.put("date.0", processDate(searchParam.getDepDate()));
 		param.put("date.1", processDate(searchParam.getDepDate()));
 		param.put("persons.0", "1");
