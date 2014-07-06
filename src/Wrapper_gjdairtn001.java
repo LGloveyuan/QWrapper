@@ -240,7 +240,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		param.put("persons.1", "0");
 		param.put("persons.2", "0");
 		param.put("date_flexibility", "fixed");
-		param.put("pricing_type", "lowest%20available");
+		param.put("pricing_type", "lowest available");
 		param.put("fare_description", "normal");
 		param.put("travel_class", "E");
 		param.put("origin", "AU");
@@ -249,8 +249,8 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 	}
 
 	public ProcessResultInfo process(String arg0, FlightSearchParam arg1) {
-generateCity(citys);
-		String html = arg0;
+	        generateCity(citys);
+	 	String html = arg0;
 		System.out.println("process html: " + html);
 		if(null!=html)html = html.replaceAll("[\\s\"]", "");
 		System.out.println("newHtml: " + html);
