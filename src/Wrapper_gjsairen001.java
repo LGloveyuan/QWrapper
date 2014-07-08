@@ -216,8 +216,8 @@ public class Wrapper_gjsairen001 implements QunarCrawler {
 		param.put("PRICING_TYPE","C");
 		param.put("DISPLAY_TYPE","2");
 		param.put("COMMERCIAL_FARE_FAMILY_1","NEWCFF");
-		param.put("DATE_RANGE_VALUE_1","1");
-		param.put("DATE_RANGE_VALUE_2","1");
+		param.put("DATE_RANGE_VALUE_1","0");
+		param.put("DATE_RANGE_VALUE_2","0");
 		param.put("DATE_RANGE_QUALIFIER_1","C");
 		param.put("DATE_RANGE_QUALIFIER_2","C");
 		param.put("SO_SITE_AVAIL_SERVICE_FEE","TRUE");
