@@ -298,7 +298,7 @@ public class Wrapper_gjdairen001 implements QunarCrawler {
 			  System.out.println("_price: " + _price);
 			  if(!"SoldOut".equals("_price") && null!=_price)
 			  {
-				  price = Double.parseDouble(_price.replaceAll(",", ""))-5;
+				  price = Double.parseDouble(_price.replaceAll(",", ""));
 			  }
 			  else{continue;}
 			  
