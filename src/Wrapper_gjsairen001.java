@@ -300,7 +300,7 @@ public class Wrapper_gjsairen001 implements QunarCrawler {
 		  FlightSegement seg = null;
 		  
         
-		  float price = Float.MAX_VALUE;
+		  double price = Double.MAX_VALUE;
 		 // float temp_price = Float.MAX_VALUE;
 		  // 将多条航班信息提取出来保存在数组里
 		  String[] str = html.split("<tablecellpadding=0cellspacing=0border=0width=100%>");
@@ -317,7 +317,7 @@ public class Wrapper_gjsairen001 implements QunarCrawler {
 
 			  if(!"SoldOut".equals("_price") && null!=_price)
 			  {
-				  price = Float.parseFloat(_price.replaceAll(",", ""));
+				  price = Double.parseDouble(_price.replaceAll(",", ""));
 			  }
 			  else{continue;}
 			  
