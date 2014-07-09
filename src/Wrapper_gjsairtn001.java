@@ -339,8 +339,8 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 		  
 		  FlightSegement seg = null;
         
-		  float price = Float.MAX_VALUE;
-		  float temp_price = Float.MAX_VALUE;
+		  double price = Double.MAX_VALUE;
+		  double temp_price = Double.MAX_VALUE;
 
 		  String start = "<trid=rowFM_" + flag + "_0_0";
 		  String end = "<tdcolspan=9>";
@@ -357,7 +357,7 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 				if(!"N/A".equals(_price)&&null!=_price)
 				{
 					System.out.println("_price: " + _price);
-					temp_price = Float.parseFloat(_price.replaceAll(",", ""));
+					temp_price = Double.parseDouble(_price.replaceAll(",", ""));
 				}
 				else{continue;}
 				
