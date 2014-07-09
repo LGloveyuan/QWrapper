@@ -293,8 +293,8 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		String arrDate = null;
 		String monUnit = "USD";
 		// 获取最低价格
-		float price = Float.MAX_VALUE;
-		float temp_price = Float.MAX_VALUE;
+		double price = Double.MAX_VALUE;
+		double temp_price = Double.MAX_VALUE;
 
 		List<FlightSegement> segs = null;
 		List<String> flightNos = null;
@@ -324,17 +324,12 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		for (int i = 0; i < str.length; i++) {
 			System.out.println("record" + i + ": " + str[i]);
 
-			/*
-			temp_price = Float.parseFloat(org.apache.commons.lang.StringUtils
-					.substringBetween(html, "USD<br/>", "</label>").replaceAll(
-							",", ""));
-							*/
 			String _price = org.apache.commons.lang.StringUtils
 					.substringBetween(html, "USD<br/>", "</label>");
 			if(!"N/A".equals(_price)&&null!=_price)
 			{
 				System.out.println("_price: " + _price);
-				temp_price = Float.parseFloat(_price.replaceAll(",", ""));
+				temp_price = Double.parseDouble(_price.replaceAll(",", ""));
 			}
 			else{continue;}
 			
