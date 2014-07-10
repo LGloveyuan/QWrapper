@@ -475,32 +475,32 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 		String[] str = s.split("-");
 		String result = "";
 		
-		switch (str[2]) {
-		case "01":
+		switch (Integer.parseInt(str[2])) {
+		case 1:
 			result += "1";
 			break;
-		case "02":
+		case 2:
 			result += "2";
 			break;
-		case "03":
+		case 3:
 			result += "3";
 			break;
-		case "04":
+		case 4:
 			result += "4";
 			break;
-		case "05":
+		case 5:
 			result += "5";
 			break;
-		case "06":
+		case 6:
 			result += "6";
 			break;
-		case "07":
+		case 7:
 			result += "7";
 			break;
-		case "08":
+		case 8:
 			result += "8";
 			break;
-		case "09":
+		case 9:
 			result += "9";
 			break;
 		default:
@@ -508,24 +508,25 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 			break;
 		}
 		
-		switch(str[1])
+		switch(Integer.parseInt(str[1]))
 		{
-		case "01":result += "Jan";break;
-		case "02":result += "Feb";break;
-		case "03":result += "Mar";break;
-		case "04":result += "Apr";break;
-		case "05":result += "May";break;
-		case "06":result += "Jun";break;
-		case "07":result += "Jul";break;
-		case "08":result += "Aug";break;
-		case "09":result += "Sep";break;
-		case "10": result += "Oct";break;
-		case "11": result += "Nov";break;
-		case "12": result += "Dec";break;
+		case 1:result += "Jan";break;
+		case 2:result += "Feb";break;
+		case 3:result += "Mar";break;
+		case 4:result += "Apr";break;
+		case 5:result += "May";break;
+		case 6:result += "Jun";break;
+		case 7:result += "Jul";break;
+		case 8:result += "Aug";break;
+		case 9:result += "Sep";break;
+		case 10: result += "Oct";break;
+		case 11: result += "Nov";break;
+		case 12: result += "Dec";break;
 		}
 
 		return result;
 	}
+
 
 	public static Date forMatDate(String strDate) {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -555,15 +556,34 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 		cal.setTime(date);
 		int current_day = cal.get(Calendar.DAY_OF_WEEK) - 1;
 		int week = 0;
-		switch(time.substring(0, 3))
+		String temp = time.substring(0, 3);
+		if("Mon".equals(temp))
 		{
-		case "Mon":week = 1;break;
-		case "Tue":week = 2;break;
-		case "Wed":week = 3;break;
-		case "Thu":week = 4;break;
-		case "Fri":week = 5;break;
-		case "Sat":week = 6;break;
-		case "Sun":week = 0;break;
+			week = 1;
+		}
+		else if("Tue".equals(temp))
+		{
+			week = 2;
+		}
+		else if("Wed".equals(temp))
+		{
+			week = 3;
+		}
+		else if("Thu".equals(temp))
+		{
+			week = 4;
+		}
+		else if("Fri".equals(temp))
+		{
+			week = 5;
+		}
+		else if("Sat".equals(temp))
+		{
+			week = 6;
+		}
+		else if("Sun".equals(temp))
+		{
+			week = 0;
 		}
 		int sub = week - current_day;
 		return (sub + 7) % 7;
