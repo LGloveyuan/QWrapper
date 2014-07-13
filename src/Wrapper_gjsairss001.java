@@ -79,11 +79,11 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	public static void main(String[] args) {
 
 		FlightSearchParam searchParam = new FlightSearchParam();
-		searchParam.setDep("DKR");
-		searchParam.setArr("ORY");
+		searchParam.setDep("SFG");
+		searchParam.setArr("FDF");
 		
-		searchParam.setDepDate("2014-07-15");
-		searchParam.setRetDate("2014-07-22");
+		searchParam.setDepDate("2014-09-18");
+		searchParam.setRetDate("2014-09-25");
 		//无效日期
 		/*searchParam.setDep("DZA");
 		searchParam.setArr("ORY");
@@ -363,9 +363,10 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 					FlightDetail flightDetail = new FlightDetail();
 					flightDetail.setFlightno(flightNos);
 					flightDetail.setDepdate(getDepdate(segJSON, true));
-					/*flightDetail.setDepcity(arg1.getDep());
-					flightDetail.setArrcity(arg1.getArr());
-					flightDetail.setWrapperid(arg1.getWrapperid());*/
+					String[] arr = getDepAndArrCity(segJSON, true);
+					
+					flightDetail.setDepcity(arr[0]);
+					flightDetail.setArrcity(arr[1]);
 					
 					
 					JSONArray djson = JSON.parseArray(listDetail);
@@ -514,6 +515,29 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	}
 	
 	/**
+	 * 获取城市三字码
+	 * @param segJSON
+	 * @param flag
+	 * @return
+	 */
+	private String[] getDepAndArrCity(JSONArray segJSON,boolean flag){
+		String[] arr = new String[2];
+		for(int i = 0; i < segJSON.size(); i++){
+			JSONObject fjson = segJSON.getJSONObject(i);
+			
+			JSONObject beginLocation = JSON.parseObject(fjson.getString("b_location"));
+			String depCity = beginLocation.getString("city_code").replaceAll("[^a-zA-Z\\d]", "");
+			JSONObject endLocation = JSON.parseObject(fjson.getString("e_location"));
+			String arrCity = endLocation.getString("city_code").replaceAll("[^a-zA-Z\\d]", "");
+			arr[0] = depCity;
+			arr[1] = arrCity;
+		}
+		return arr;
+	}
+	
+	
+	
+	/**
 	 * @throws ParseException 
 	 * 
 	 * @Title: getFlightDetail 
@@ -531,8 +555,8 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 			flightDetail.setDepdate(getDate(arg1.getDepDate()));
 			flightDetail.setMonetaryunit(JSON.parseObject(priceJson.getString("currency")).getString("code"));
 			flightDetail.setPrice(priceJson.getDouble("total_amount"));
-			flightDetail.setDepcity(arg1.getDep());
-			flightDetail.setArrcity(arg1.getArr());
+	//		flightDetail.setDepcity(arg1.getDep());
+	//		flightDetail.setArrcity(arg1.getArr());
 			flightDetail.setWrapperid(arg1.getWrapperid());
 			flightDetail.setTax(priceJson.getDouble("tax"));
 			
