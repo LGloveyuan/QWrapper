@@ -360,20 +360,12 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 	}
 
 
-	private static Date processDateForDetail(String depDate) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date date = null;
-		if(depDate != null)
-		{
-			try {
-				date = sdf.parse(depDate);
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
-		return date;
+       private static Date processDateForDetail(String strDate) {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		ParsePosition pos = new ParsePosition(0);
+		Date strtodate = formatter.parse(strDate, pos);
+		return strtodate;
 	}
-
 
 	private static String processDateForParam(String strDate) {
 		String rsDate = "";
