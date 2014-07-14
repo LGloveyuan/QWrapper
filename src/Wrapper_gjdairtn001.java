@@ -99,7 +99,9 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 	    
 	    BookingInfo bookingInfo = new BookingInfo();
 	    bookingInfo.setAction(SEARCH_FLIGHT_URL);
-	    bookingInfo.setInputs(getSearchParamMapForSingle(arg0));
+	    Map<String, String> param = getSearchParamMapForSingle(arg0);
+	    param.put("trip_type", "one way");
+	    bookingInfo.setInputs(param);
 	    bookingInfo.setMethod("get");
 	    
 	    bookingResult.setData(bookingInfo);
@@ -226,7 +228,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 
 		param.put("depart", searchParam.getDep());
 		param.put("dest.1", searchParam.getArr());
-		param.put("trip_type", "one way");
+		param.put("trip_type", "one%20way");
 		param.put("date.0", processDate(searchParam.getDepDate()));
 		param.put("date.1", processDate(searchParam.getDepDate()));
 		param.put("persons.0", "1");
