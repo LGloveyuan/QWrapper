@@ -1,3 +1,4 @@
+
 import java.text.Format;
 import java.text.ParseException;
 import java.text.ParsePosition;
@@ -51,15 +52,15 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 
 	public static final String HOME_URL = "http://www.airtahitinui.com.au/";
 	
-	private static Map citys = new HashMap<String, String>();
+	private static Map<String,String> citys = new HashMap<String, String>();
 
 	public static void main(String[] args) {
 
 		// 搜索条件设置
 		FlightSearchParam searchParam = new FlightSearchParam();
-		searchParam.setDep("LAX");
-		searchParam.setArr("MEL"); // CDG
-		searchParam.setDepDate("2014-08-20");
+		searchParam.setDep("LAX"); //LAX
+		searchParam.setArr("MEL"); // MEL
+		searchParam.setDepDate("2014-07-22"); // 2014-08-14
 		searchParam.setTimeOut("60000");
 		searchParam.setToken("");
 		searchParam.setWrapperid("gjdairtn001");
@@ -92,15 +93,13 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 
 	}
 
-	@Override
 	public BookingResult getBookingInfo(FlightSearchParam arg0) {
 
 		BookingResult bookingResult = new BookingResult();
 	    
 	    BookingInfo bookingInfo = new BookingInfo();
 	    bookingInfo.setAction(SEARCH_FLIGHT_URL);
-	    bookingInfo.setInputs(getSearchParamMapForSingle1(arg0));
-
+	    bookingInfo.setInputs(getSearchParamMapForSingle(arg0));
 	    bookingInfo.setMethod("get");
 	    
 	    bookingResult.setData(bookingInfo);
@@ -115,7 +114,6 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 			String html = getResultHtml(getHttp(searchParam), GET,
 					SEARCH_FLIGHT_URL, getSearchParamMapForSingle(searchParam));
 
-			System.out.println("htmlAll: " + html);
 			if(html.contains("Sorry. There are no flights available that meet your request. Please try an alternative date."))
 			{return "invalid_date";}
 			String htmlResult = org.apache.commons.lang.StringUtils
@@ -157,17 +155,13 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 			}
 
 			GetMethod get1 = new QFGetMethod(SEARCH_FLIGHT_URL);
-			System.out.println(httpMethod.getStatusCode());
 
-//			httpMethod.setFollowRedirects(true);
 			httpMethod.setFollowRedirects(false);
 			String cookie = StringUtils.join(client.getState().getCookies(),
 					"; ");
-			System.out.println("cookie: " + cookie);
 			client.getState().clearCookies();
 			get1.addRequestHeader("Cookie", cookie);
 			client.executeMethod(get1);
-			System.out.println(client.executeMethod(get1));
 			return get1.getResponseBodyAsString();
 
 		} catch (Exception e) {
@@ -212,7 +206,6 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 			}
 			String allUrl = uri.indexOf("?") > 0 ? (uri + "&" + result) : (uri
 					+ "?" + result);
-			System.out.println("allUrl: " + allUrl);
 
 			GetMethod get = new QFGetMethod(allUrl);
 
@@ -234,7 +227,6 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		param.put("depart", searchParam.getDep());
 		param.put("dest.1", searchParam.getArr());
 		param.put("trip_type", "one%20way");
-	//        param.put("trip_type", "one way");
 		param.put("date.0", processDate(searchParam.getDepDate()));
 		param.put("date.1", processDate(searchParam.getDepDate()));
 		param.put("persons.0", "1");
@@ -249,39 +241,11 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		return param;
 	}
 
-	public static Map<String, String> getSearchParamMapForSingle1(
-			FlightSearchParam searchParam) {
-		return getSearchParamMap1(searchParam, false);
-	}
-
-	private static Map<String, String> getSearchParamMap1(
-			FlightSearchParam searchParam, boolean isRound) {
-		Map<String, String> param = new HashMap<String, String>();
-
-		param.put("depart", searchParam.getDep());
-		param.put("dest.1", searchParam.getArr());
-		param.put("trip_type", "one way");
-	//        param.put("trip_type", "one way");
-		param.put("date.0", processDate(searchParam.getDepDate()));
-		param.put("date.1", processDate(searchParam.getDepDate()));
-		param.put("persons.0", "1");
-		param.put("persons.1", "0");
-		param.put("persons.2", "0");
-		param.put("date_flexibility", "fixed");
-		param.put("pricing_type", "lowest%20available");
-		param.put("fare_description", "normal");
-		param.put("travel_class", "E");
-		param.put("origin", "AU");
-
-		return param;
-	}
-	
 	public ProcessResultInfo process(String arg0, FlightSearchParam arg1) {
-	        generateCity(citys);
-	 	String html = arg0;
-		System.out.println("process html: " + html);
+
+		generateCity(citys);
+		String html = arg0;
 		if(null!=html)html = html.replaceAll("[\\s\"]", "");
-		System.out.println("newHtml: " + html);
 		FlightSearchParam serachParam = arg1;
 
 		String depPort = null;
@@ -294,7 +258,6 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		String monUnit = "USD";
 		// 获取最低价格
 		double price = Double.MAX_VALUE;
-		double temp_price = Double.MAX_VALUE;
 
 		List<FlightSegement> segs = null;
 		List<String> flightNos = null;
@@ -304,8 +267,8 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		OneWayFlightInfo baseFlight = new OneWayFlightInfo();
 		ProcessResultInfo result = new ProcessResultInfo();
 
-		segs = new ArrayList();
-		flightNos = new ArrayList();
+		segs = new ArrayList<FlightSegement>();
+		flightNos = new ArrayList<String>();
 
 		if ("Exception".equals(html) || null == html) {
 			result.setRet(false);
@@ -322,28 +285,30 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		// 搜索每条中转线路的航班信息
 		String[] str = html.split("<trid=rowFM_0_[0-9]_0");
 		for (int i = 0; i < str.length; i++) {
-			System.out.println("record" + i + ": " + str[i]);
-
-			String _price = org.apache.commons.lang.StringUtils
-					.substringBetween(html, "USD<br/>", "</label>");
-			if(!"N/A".equals(_price)&&null!=_price)
-			{
-				System.out.println("_price: " + _price);
-				temp_price = Double.parseDouble(_price.replaceAll(",", ""));
-			}
-			else{continue;}
-			
-			if (temp_price >= price)
-				continue;
+			 String regx_price = "\\SD<br/>(.*?)\\<";
+			  Pattern p_price = Pattern.compile(regx_price);
+	          Matcher m_price = p_price.matcher(str[i]);
+	          while(m_price.find())
+	        	{
+	        		String _price = m_price.group(1);
+	        		double temp_price = Double.MAX_VALUE;
+	        		if(!"N/A".equals("_price")&&null!=_price)
+	        		{
+	        			temp_price = Double.parseDouble(_price.replaceAll(",", ""));
+	        		}
+	        		if(price > temp_price)
+	        			price = temp_price;
+	        	}
+	          if(Double.MAX_VALUE == price)
+	        	  continue;
 
 			if (null != segs)
 				segs.clear();
 			if (null != flightNos)
 				flightNos.clear();
 			flightDetail = new FlightDetail();
-			price = temp_price;
+
 			String regx1 = "\\<spanclass='FlightNumberInTable'>(.*?)\\</td></tr>";
-			System.out.println("regx: " + regx1);
 			Pattern p1 = Pattern.compile(regx1);
 			Matcher m1 = p1.matcher(html);
 			int x = 0;
@@ -351,8 +316,6 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 				seg = new FlightSegement();
 
 				String info = m1.group(1);
-
-				System.out.println("filght info: " + info);
 				// 截取每条航班信息的出发城市和到达城市
 				String regx2 = "\\<tdclass=step2CellflightInfo_middle>(.*?)\\<br/>";
 				Pattern p2 = Pattern.compile(regx2);
@@ -370,9 +333,6 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 				flightNo = org.apache.commons.lang.StringUtils
 						.substringBetween(info, "", "</span>");
 				flightNos.add(flightNo);
-				System.out.println("fightNo: " + flightNo);
-				System.out.println("depPort: " + depPort);
-				System.out.println("arrPort: " + arrPort);
 
 				// 截取出发时间和到达时间
 				String regx3 = "\\<br/>(.*?)\\</td>";
@@ -387,11 +347,9 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 						arrTime = time;
 					k--;
 				}
-				System.out.println("depTime: " + depTime);
 				if (x != 0) { // 第一条航班的到达时间处理与其他不同
 					arrTime = info.substring(info.length() - 8, info.length());
 				}
-				System.out.println("arrTime: " + arrTime);
 				x++;
 
 				seg.setDepairport((String)citys.get(depPort));
@@ -403,9 +361,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 				seg.setArrDate(getDateFromTime(serachParam.getDepDate(), arrTime));
 				segs.add(seg);
 			}
-			System.out.println("price: " + price);
 
-			System.out.println("dep: " + serachParam.getDep());
 			flightDetail.setDepcity(serachParam.getDep());
 			flightDetail.setArrcity(serachParam.getArr());
 			flightDetail.setDepdate(forMatDate(serachParam
@@ -429,7 +385,6 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		result.setRet(true);
 		result.setStatus(Constants.SUCCESS);
 		result.setData(flightLists);
-		System.out.println("result: " + result);
 		return result;
 	}
 
@@ -516,7 +471,6 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		ParsePosition pos = new ParsePosition(0);
 		Date strtodate = formatter.parse(strDate, pos);
-		System.out.println("stroDate: " + strtodate);
 		return strtodate;
 	}
 
@@ -524,8 +478,6 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 
 		Date date = forMatDate(strDate);
 		int day = getDay(date, time);
-		System.out.println("strDate: " + strDate);
-		System.out.println("Date: " + date);
 		Calendar now = Calendar.getInstance();
 		now.setTime(date);
 		now.set(Calendar.DATE, now.get(Calendar.DATE) + day);
@@ -535,7 +487,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		
 	}
 
-        private static int getDay(Date date, String time) {
+	private static int getDay(Date date, String time) {
 		
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
@@ -574,7 +526,7 @@ public class Wrapper_gjdairtn001 implements QunarCrawler {
 		return (sub + 7) % 7;
 	}
 	
-	private static void generateCity(Map citys)
+	private static void generateCity(Map<String,String> citys)
 	{
 		citys.put("Sydney", "SYD");citys.put("Melbourne", "MEL");
 		citys.put("Brisbane", "BNE");citys.put("LosAngeles", "LAX");
