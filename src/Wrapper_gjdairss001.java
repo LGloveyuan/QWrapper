@@ -65,9 +65,9 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 	public static void main(String[] args) {
 
 		FlightSearchParam searchParam = new FlightSearchParam();
-		searchParam.setDep("ZLN");
-		searchParam.setArr("MRU");
-		searchParam.setDepDate("2014-10-08");
+		searchParam.setDep("SFG");//ZLN
+		searchParam.setArr("FDF");//MRU
+		searchParam.setDepDate("2014-09-14");//2014-10-08
 		searchParam.setTimeOut("60000");
 		searchParam.setToken("");
 		searchParam.setWrapperid("gjdairss001");
@@ -145,8 +145,7 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 		try {
 			httpMethod = initMethod(method,uri,paramMap) ;
 			
-			int statusCode = client.executeMethod(httpMethod);  
-			
+			int statusCode = client.executeMethod(httpMethod); 
 			if(statusCode >=300 && statusCode <=399){
 				Header location = httpMethod.getResponseHeader("Location");
 				String url = "";
@@ -270,19 +269,19 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 		List<OneWayFlightInfo> flightList = new ArrayList<OneWayFlightInfo>(); 
 		ProcessResultInfo result = new ProcessResultInfo(); 
 		String monetaryunit ="CAD";
-	
-	        if(null == resultJson || null == JSON.parseObject(resultJson).getJSONObject("list_tab"))
+		
+		if(null == resultJson || null == JSON.parseObject(resultJson).getJSONObject("list_tab"))
 		{
 			result.setRet(false);
 			result.setStatus(Constants.NO_RESULT);
 			return result;
 		}
-		
+	
 		JSONObject ojson1 = JSON.parseObject(resultJson).getJSONObject("list_tab");
-		
+
 		JSONArray proposed_bound = ojson1.getJSONArray("list_proposed_bound");
 		JSONArray recommendation = ojson1.getJSONArray("list_recommendation");
-		
+
 		if(null == proposed_bound || null == recommendation)
 		{
 			result.setRet(false);
@@ -312,7 +311,6 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 			for(int j=0;j<ajson1.size();j++)
 			{
 				JSONObject ojson4 = ajson1.getJSONObject(j);
-
 				FlightSegement seg = new FlightSegement();
 				String depAirport = null;
 				String arrAirport = null;
@@ -324,7 +322,7 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 				
 				depAirport = ojson4.getJSONObject("b_location").getString("location_code");
 				arrAirport = ojson4.getJSONObject("e_location").getString("location_code");
-				
+
 				flightNo = ojson4.getJSONObject("airline").getString("code") + ojson4.getString("flight_number");
 				flightNos.add(flightNo);
 				
@@ -401,15 +399,13 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 		for(int i=0;i<recommendation.size();i++)
 		{
 			JSONObject ojson1 = recommendation.getJSONObject(i);
-			
+
 			JSONArray bound = ojson1.getJSONArray("list_bound");
-			
 			JSONArray trip_price = ojson1.getJSONArray("list_trip_price");
 			
 			JSONObject ojson2 = trip_price.getJSONObject(0);
 			
 			String _price = ojson2.getString("amount_without_tax");
-			
 			double price = Double.MAX_VALUE;
 			if(null != _price) price = Double.parseDouble(_price); 
 			String _tax = ojson2.getString("tax");
@@ -423,7 +419,6 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 				JSONObject ojson4 = flights.getJSONObject(j);
 				String flight_id = ojson4.getString("flight_id");
 				Double temp_price = prices.get(flight_id + "price");
-				System.out.println("temp_price: " + temp_price);
 				Double temp_tax = prices.get(flight_id + "tax");
 				if(null == temp_price || (price+tax) < (temp_price+temp_tax))
 				{
