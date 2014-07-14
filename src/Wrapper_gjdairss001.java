@@ -271,6 +271,13 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 		ProcessResultInfo result = new ProcessResultInfo(); 
 		String monetaryunit ="CAD";
 	
+	        if(null == resultJson || null == JSON.parseObject(resultJson).getJSONObject("list_tab"))
+		{
+			result.setRet(false);
+			result.setStatus(Constants.NO_RESULT);
+			return result;
+		}
+		
 		JSONObject ojson1 = JSON.parseObject(resultJson).getJSONObject("list_tab");
 		
 		JSONArray proposed_bound = ojson1.getJSONArray("list_proposed_bound");
