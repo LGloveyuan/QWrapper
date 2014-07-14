@@ -1,4 +1,3 @@
-package com.gwn.test;
 
 import java.io.IOException;
 import java.net.InetAddress;
