@@ -1,3 +1,4 @@
+package com.gwn.test;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -9,12 +10,14 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
@@ -144,6 +147,7 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 			httpMethod = initMethod(method,uri,paramMap) ;
 			
 			int statusCode = client.executeMethod(httpMethod);  
+			
 			if(statusCode >=300 && statusCode <=399){
 				Header location = httpMethod.getResponseHeader("Location");
 				String url = "";
@@ -302,7 +306,7 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 			for(int j=0;j<ajson1.size();j++)
 			{
 				JSONObject ojson4 = ajson1.getJSONObject(j);
-				
+
 				FlightSegement seg = new FlightSegement();
 				String depAirport = null;
 				String arrAirport = null;
@@ -360,7 +364,7 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 	}
 
 
-       private static Date processDateForDetail(String strDate) {
+	private static Date processDateForDetail(String strDate) {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		ParsePosition pos = new ParsePosition(0);
 		Date strtodate = formatter.parse(strDate, pos);
@@ -393,11 +397,13 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 			JSONObject ojson1 = recommendation.getJSONObject(i);
 			
 			JSONArray bound = ojson1.getJSONArray("list_bound");
+			
 			JSONArray trip_price = ojson1.getJSONArray("list_trip_price");
 			
 			JSONObject ojson2 = trip_price.getJSONObject(0);
 			
 			String _price = ojson2.getString("amount_without_tax");
+			
 			double price = Double.MAX_VALUE;
 			if(null != _price) price = Double.parseDouble(_price); 
 			String _tax = ojson2.getString("tax");
@@ -411,6 +417,7 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 				JSONObject ojson4 = flights.getJSONObject(j);
 				String flight_id = ojson4.getString("flight_id");
 				Double temp_price = prices.get(flight_id + "price");
+				System.out.println("temp_price: " + temp_price);
 				Double temp_tax = prices.get(flight_id + "tax");
 				if(null == temp_price || (price+tax) < (temp_price+temp_tax))
 				{
