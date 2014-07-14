@@ -55,6 +55,8 @@ public class Wrapper_gjdairen001 implements QunarCrawler {
 	
 	public static String SEARCH_FLIGHT_URL = "https://wftc2.e-travel.com/plnext/FPCairdolomiti/Override.action" ;
 	
+	public static String SEARCH_FLIGHT_URL_SECOND = "https://www.airdolomiti.eu/moduloRicerca.html" ;
+	
 	public static void main(String[] args) {
 
 		FlightSearchParam searchParam = new FlightSearchParam();
@@ -143,7 +145,7 @@ public class Wrapper_gjdairen001 implements QunarCrawler {
 				}
 			}
 			
-			return httpMethod.getResponseBodyAsString() ;
+		return httpMethod.getResponseBodyAsString() ;
 			
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -199,15 +201,15 @@ public class Wrapper_gjdairen001 implements QunarCrawler {
 		}
 	}
 
+    
     private static Map<String,String> getSearchParamMapForSingle(FlightSearchParam searchParam){
 		Map<String,String> param = new HashMap<String,String>() ;
-
 		param.put("B_LOCATION_1",searchParam.getDep());
 		param.put("E_LOCATION_1",searchParam.getArr());
 		param.put("B_LOCATION_2",searchParam.getArr());
 		param.put("E_LOCATION_2",searchParam.getDep());
-		param.put("B_DATE_1",searchParam.getDepDate().replaceAll("-", "")+"0000");
-		param.put("B_DATE_2",searchParam.getDepDate().replaceAll("-", "")+"0000");
+		param.put("B_DATE_1",searchParam.getDepDate().replaceAll("-","")+"0000");
+		param.put("B_DATE_2","197001010100");
 		param.put("TRIP_TYPE","O");
 		
 		param.put("EXTERNAL_ID","BOOKING");
@@ -232,6 +234,30 @@ public class Wrapper_gjdairen001 implements QunarCrawler {
 		param.put("DATE_RANGE_QUALIFIER_1","C");
 		param.put("DATE_RANGE_QUALIFIER_2","C");
 		param.put("SO_SITE_AVAIL_SERVICE_FEE","TRUE");
+		
+		
+		param.put("SO_SITE_OFFICE_ID","VRNEN08AA");
+		param.put("SO_SITE_ALLOW_PROMO","TRUE");
+		param.put("BOOKING_FLOW","REVENUE");
+		param.put("SO_SITE_FP_PRICING_TYPE","O");
+		param.put("HAS_INFANT_2","FALSE");
+		param.put("HAS_INFANT_3","FALSE");
+		param.put("HAS_INFANT_4","FALSE");
+		param.put("HAS_INFANT_5","FALSE");
+		param.put("HAS_INFANT_6","FALSE");
+		param.put("HAS_INFANT_7","FALSE");
+		param.put("HAS_INFANT_8","FALSE");
+		param.put("HAS_INFANT_9","FALSE");
+		param.put("SO_SITE_EXT_PSPURL","https://www.constriv.com/cg/gateway/payment/openConnPaymentInit.jsp");
+		param.put("SO_SITE_EXT_MerchantID","334316907");
+		param.put("SO_SITE_QUEUE_OFFICE_ID","VRNEN0112");
+		param.put("SO_SITE_FEE_TYPE","0");
+		param.put("SO_SITE_FEE_PERCENTAGE","0");
+		param.put("SO_SITE_FEE_AMOUNT","5");
+		param.put("SO_SITE_FEE_CURRENCY","EUR");
+		param.put("SO_GL","%3C%3Fxml+version%3D%221.0%22+encoding%3D%22iso-8859-1%22%3F%3E%3CSO_GL%3E++%3CGLOBAL_LIST+mode%3D%22complete%22%3E++++%3CNAME%3ESO_SINGLE_MULTIPLE_COMMAND_BUILDER%3C%2FNAME%3E++++%3CLIST_ELEMENT%3E++++++%3CCODE%3E1%3C%2FCODE%3E++++++%3CLIST_VALUE%3E++++++++%3C%21%5BCDATA%5BTTO%2FST01%2FCNEWFEE%2FF5%5D%5D%3E++++++%3C%2FLIST_VALUE%3E++++++%3CLIST_VALUE%3ES%3C%2FLIST_VALUE%3E++++%3C%2FLIST_ELEMENT%3E++%3C%2FGLOBAL_LIST%3E++%3CGLOBAL_LIST%3E++++%3CNAME%3ESITE_SERVICE_FEE%3C%2FNAME%3E++++%3CLIST_ELEMENT%3E++++++%3CCODE%3E0%3C%2FCODE%3E++++++%3CLIST_VALUE%3E0%3C%2FLIST_VALUE%3E++++++%3CLIST_VALUE%3E0%3C%2FLIST_VALUE%3E++++++%3CLIST_VALUE%3E5.00%3C%2FLIST_VALUE%3E++++++%3CLIST_VALUE%3E%3C%2FLIST_VALUE%3E++++%3C%2FLIST_ELEMENT%3E++%3C%2FGLOBAL_LIST%3E%3C%2FSO_GL%3E");
+		
+	//	SO_SITE_EXT_PSPURL=https%3A%2F%2Fwww.constriv.com%2Fcg%2Fgateway%2Fpayment%2FopenConnPaymentInit.jsp
 		return param ;
 	}
 	
@@ -380,6 +406,22 @@ public class Wrapper_gjdairen001 implements QunarCrawler {
 		
 		return httpClient ;
 		
+	}
+	
+	/**
+	 * 分别截取年月日
+	 * @param dateStr
+	 * @return
+	 */
+	private static String[] getYearMonthDay(String dateStr){
+		String[] arr = new String[3];
+		String year = dateStr.substring(0, dateStr.indexOf("-"));
+		String month = dateStr.substring(dateStr.indexOf("-")+1,dateStr.lastIndexOf("-"));
+		String day = dateStr.substring(dateStr.lastIndexOf("-")+1,dateStr.length());
+		arr[0] = year;
+		arr[1] = month;
+		arr[2] = day;
+		return arr;
 	}
 	
 	public static Date forMatDate(String strDate) {
