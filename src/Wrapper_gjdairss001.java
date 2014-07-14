@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
@@ -339,6 +341,7 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 			flightDetail.setMonetaryunit(monetaryunit);
 			flightDetail.setPrice(price);
 			flightDetail.setTax(tax);
+			flightDetail.setDepdate(processDateForDetail(arg1.getDepDate()));
 			flightDetail.setWrapperid(arg1.getWrapperid());
 			
 			baseFlight.setDetail(flightDetail);
@@ -354,6 +357,21 @@ public class Wrapper_gjdairss001 implements QunarCrawler {
 		return result;
 		
 		
+	}
+
+
+	private static Date processDateForDetail(String depDate) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = null;
+		if(depDate != null)
+		{
+			try {
+				date = sdf.parse(depDate);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+		return date;
 	}
 
 
