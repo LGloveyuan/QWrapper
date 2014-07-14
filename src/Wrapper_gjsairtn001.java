@@ -421,7 +421,15 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 	          }
 	          flightDetail.setDepcity(searchParam.getDep());
 	          flightDetail.setArrcity(searchParam.getArr());
-	          flightDetail.setDepdate(forMatDate(searchParam.getDepDate()));
+	          //flightDetail.setDepdate(forMatDate(searchParam.getDepDate()));
+	          if(0 == flag)
+	          {
+	        	  flightDetail.setDepdate(forMatDate(searchParam.getDepDate()));  
+	          }
+	          else if(1 == flag)
+	          {
+	        	  flightDetail.setDepdate(forMatDate(searchParam.getRetDate()));
+	          }
 	          flightDetail.setFlightno(flightNos);
 	          flightDetail.setMonetaryunit(monUnit);
 	          flightDetail.setTax(0);
