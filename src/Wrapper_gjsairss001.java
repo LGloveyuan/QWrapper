@@ -26,6 +26,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 
+
+
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
@@ -60,7 +62,7 @@ import com.qunar.qfwrapper.util.QFPostMethod;
 /**
  * 
  * @ClassName: Wrapper_gjdairju001 
- * @Description:  双程机票抓取
+ * @Description:  科西嘉国际航空
  * @author: LG
  * @date 2014-7-10 
  *
@@ -137,7 +139,7 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 		}
 
 	/**
-	 * 获取有效航班结果信息
+	 * 鑾峰彇鏈夋晥鑸彮缁撴灉淇℃伅
 	 */
 	public String getHtml(FlightSearchParam searchParam) {
 		Protocol myhttps = new Protocol("https", new MySSLSocketFactory(), 443);  
@@ -159,7 +161,7 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	}
 
 	/**
-	 * 获取结果页面HTML
+	 * 鑾峰彇缁撴灉椤甸潰HTML
 	 * @param client
 	 * @param method
 	 * @param uri
@@ -213,7 +215,7 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	}
 	
 	/**
-	 * 初始化POST或者GET方法
+	 * 鍒濆鍖朠OST鎴栬�GET鏂规硶
 	 * @param method
 	 * @param uri
 	 * @param paramMap
@@ -254,15 +256,15 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	}
 
     /**
-     * 获取参数对
+     * 鑾峰彇鍙傛暟瀵�
      * @param searchParam
      * @return
      */
     private static Map<String,String> getSearchParamMapForSingle(FlightSearchParam searchParam){
 		Map<String,String> param = new HashMap<String,String>();
-		//出发日期处理
+		//鍑哄彂鏃ユ湡澶勭悊
 		String[] depDate = getYearMonthDay(searchParam.getDepDate());
-		//返程日期处理
+		//杩旂▼鏃ユ湡澶勭悊
 		String[] retDate = getYearMonthDay(searchParam.getRetDate());
 		param.put("TopLevelNode","1043");
 		param.put("ContentNodeID","1043");
@@ -270,11 +272,11 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 		param.put("language_code","eng-CA");
 		param.put("siteaccess","engca");
 		param.put("CallActionHandler","");
-	//	param.put("LiaisonID","819");   //值是变化的
-	//	param.put("LiaisonID2","2842");  //值是变化的
+	//	param.put("LiaisonID","819");   //鍊兼槸鍙樺寲鐨�
+	//	param.put("LiaisonID2","2842");  //鍊兼槸鍙樺寲鐨�
 		
-		param.put("LiaisonID","");   //值是变化的
-		param.put("LiaisonID2","");  //值是变化的
+		param.put("LiaisonID","");   //鍊兼槸鍙樺寲鐨�
+		param.put("LiaisonID2","");  //鍊兼槸鍙樺寲鐨�
 		
 		param.put("ContentObjectAttribute_ezstring_data_text_258665",searchParam.getDep());
 		param.put("ContentObjectAttribute_ezstring_data_text_258666",searchParam.getArr());
@@ -320,12 +322,12 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	}
 	
     public ProcessResultInfo process(String arg0, FlightSearchParam arg1) {
-		 String html = arg0;
+		    String html = arg0;
 	        System.out.println(html);
 			
-			/* ProcessResultInfo中，
-			 * ret为true时，status可以为：SUCCESS(抓取到机票价格)|NO_RESULT(无结果，没有可卖的机票)
-			 * ret为false时，status可以为:CONNECTION_FAIL|INVALID_DATE|INVALID_AIRLINE|PARSING_FAIL|PARAM_ERROR
+			/* ProcessResultInfo涓紝
+			 * ret涓簍rue鏃讹紝status鍙互涓猴細SUCCESS(鎶撳彇鍒版満绁ㄤ环鏍�|NO_RESULT(鏃犵粨鏋滐紝娌℃湁鍙崠鐨勬満绁�
+			 * ret涓篺alse鏃讹紝status鍙互涓�CONNECTION_FAIL|INVALID_DATE|INVALID_AIRLINE|PARSING_FAIL|PARAM_ERROR
 			 */
 			ProcessResultInfo result = new ProcessResultInfo();
 			if ("Exception".equals(html)) {	
@@ -333,13 +335,17 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 				result.setStatus(Constants.CONNECTION_FAIL);
 				return result;			
 			}		
-			//需要有明显的提示语句，才能判断是否INVALID_DATE|INVALID_AIRLINE|NO_RESULT
+			//闇�鏈夋槑鏄剧殑鎻愮ず璇彞锛屾墠鑳藉垽鏂槸鍚NVALID_DATE|INVALID_AIRLINE|NO_RESULT
 			if (null != html && html.indexOf("siteParameters") != -1) {
 				result.setRet(false);
 				result.setStatus(Constants.INVALID_DATE);
 				return result;			
 			}
 			
+			// 定义价格和航班映射Map**************************************************************
+			Map<String, Double> depPrices = new HashMap<String, Double>();
+			Map<String, Double> retPrices = new HashMap<String, Double>();
+			//*******************************************************************************
 
 		//	String listSegment = org.apache.commons.lang.StringUtils.substringBetween(html, "\"list_segment\":", ",\"flight_id\"");
 			String listFlight = org.apache.commons.lang.StringUtils.substringBetween(html, "\"list_proposed_bound\":", ",\"list_recommendation\"");
@@ -347,6 +353,10 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 			String listDetail = org.apache.commons.lang.StringUtils.substringBetween(html, "\"list_recommendation\":", ",\"list_date\":");		
 			System.out.println(listDetail);
 			try {			
+				// 生成价格和航班的映射*************************
+				getPriceTax(listDetail, depPrices, 0);
+				getPriceTax(listDetail, retPrices, 1);
+				//****************************************
 				List<RoundTripFlightInfo> roundList = new ArrayList<RoundTripFlightInfo>() ;
 				JSONArray flightJson = JSON.parseArray(listFlight);	
 				JSONObject oneJson = flightJson.getJSONObject(0);
@@ -355,29 +365,52 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 				JSONArray retFlightJSON = JSON.parseArray(retJson.getString("list_flight"));
 				
 				for(int i = 0; i < oneFlightJSON.size(); i++){
-					//去程航段
+					//鍘荤▼鑸
 					JSONObject ojson = oneFlightJSON.getJSONObject(i);
 					JSONArray segJSON = JSON.parseArray(ojson.getString("list_segment"));
-					List<FlightSegement> oneSegs = getFlightSegements(segJSON);
-					List<String> flightNos = getFlightNoList(segJSON);
-					FlightDetail flightDetail = new FlightDetail();
-					flightDetail.setFlightno(flightNos);
-					flightDetail.setDepdate(getDepdate(segJSON, true));
-					String[] arr = getDepAndArrCity(segJSON, true);
-					
-					flightDetail.setDepcity(arr[0]);
-					flightDetail.setArrcity(arr[1]);
+					//获取价格和税*******************************************
+					String flight_id = ojson.getString("flight_id");
+					double price = 0;
+					double tax = 0;
+					price = depPrices.get(flight_id + "price");
+					tax = depPrices.get(flight_id + "tax");
 					
 					
 					JSONArray djson = JSON.parseArray(listDetail);
 					
 					for(int j = 0; j < retFlightJSON.size(); j++){
 						
+						//*****************************************************
+						List<FlightSegement> oneSegs = getFlightSegements(segJSON);
+						List<String> flightNos = getFlightNoList(segJSON);
+						FlightDetail flightDetail = new FlightDetail();
+						flightDetail.setFlightno(flightNos);
+						flightDetail.setDepdate(getDepdate(segJSON, true));
+						String[] arr = getDepAndArrCity(segJSON, true);
+						
+						flightDetail.setDepcity(arr[0]);
+						flightDetail.setArrcity(arr[1]);
+						
+						flightDetail.setMonetaryunit("CAD");
+						flightDetail.setWrapperid(arg1.getWrapperid());
+						
+						//*************************************************
+						flightDetail.setPrice(price);
+						flightDetail.setTax(tax);
+						//**************************************************
+						
 						RoundTripFlightInfo  retFlight = new RoundTripFlightInfo();
 						
-					     //返回航段
+					     //杩斿洖鑸
 						JSONObject rjson = retFlightJSON.getJSONObject(j);
 						JSONArray retsegJSON = JSON.parseArray(rjson.getString("list_segment"));
+						//***********************************************************************
+						String ret_flight_id = rjson.getString("flight_id");
+						double ret_price = 0;
+						double ret_tax = 0;
+						ret_price = depPrices.get(ret_flight_id + "price");
+						ret_tax = depPrices.get(ret_flight_id + "tax");
+						//************************************************************************
 						List<FlightSegement> retSegs = getFlightSegements(retsegJSON);
 						List<String> retFlightNos = getFlightNoList(retsegJSON);
 						
@@ -388,22 +421,30 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 					    JSONObject object = array.getJSONObject(0);
 					    JSONObject retobject = array.getJSONObject(1);
 					    
-						flightDetail = getFlightDetail(flightDetail,jsonArray,ojson,arg1);
+					//	flightDetail = getFlightDetail(flightDetail,jsonArray,ojson,arg1);
+						//*********************************
+					//	flightDetail.setPrice(ret_price);
+					//	flightDetail.setTax(ret_tax);
+						//**********************************
 						retFlight.setInfo(oneSegs);
 						retFlight.setRetinfo(retSegs);
 						retFlight.setDetail(flightDetail) ;//detail
-						retFlight.setOutboundPrice(object.getDouble("total_amount")) ;//去程价格
+				//		retFlight.setOutboundPrice(object.getDouble("total_amount")) ;//去程价格
+						retFlight.setOutboundPrice(price+tax) ;//去程价格
+						
 					//	retFlight.setRetdepdate(getDepdate(retsegJSON, false)) ;//返程日期
 						retFlight.setRetdepdate(getDate(arg1.getRetDate())) ;//返程日期
-						retFlight.setRetflightno(retFlightNos) ; //返程航班号
-						retFlight.setReturnedPrice(retobject.getDouble("total_amount")) ;//返程价格
+						retFlight.setRetflightno(retFlightNos) ; //返程日期
+						
+				//		retFlight.setReturnedPrice(retobject.getDouble("total_amount")) ;//返程价格
+						retFlight.setReturnedPrice(ret_price+ret_tax) ;//返程价格
 						roundList.add(retFlight);
 						
 					}
 					
 				}
 				
-				//测试
+				//娴嬭瘯
 				String jsonString = JSON.toJSONString(roundList);
 				System.out.println(jsonString);
 				
@@ -425,12 +466,58 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 			}
 		}
 	
+	private void getPriceTax(String listDetail, Map<String, Double> prices, int flag) 
+	{
+		JSONArray recommendation = JSON.parseArray(listDetail);
+		
+		for(int i=0;i<recommendation.size();i++)
+		{
+			JSONObject ojson1 = recommendation.getJSONObject(i);
+			System.out.println("ojson1" + i + ": " + ojson1);
+			
+			JSONArray bound = ojson1.getJSONArray("list_bound");
+			System.out.println("bound: " + bound);
+			JSONArray trip_price = ojson1.getJSONArray("list_trip_price");
+			System.out.println("trip_price: " + trip_price);
+			
+			JSONObject ojson2 = trip_price.getJSONObject(0).getJSONArray("list_bound_price").getJSONObject(flag);
+			
+			String _price = ojson2.getString("amount_without_tax");
+			System.out.println("price: " + _price);
+			double price = Double.MAX_VALUE;
+			if(null != _price) price = Double.parseDouble(_price); 
+			String _tax = ojson2.getString("tax");
+			System.out.println("tax: " + _tax);
+			double tax = 0;
+			if(null != _tax) tax = Double.parseDouble(_tax);
+			
+			JSONObject ojson3 = bound.getJSONObject(flag);
+			JSONArray flights = ojson3.getJSONArray("list_flight");
+			System.out.println("flights: " + flights);
+			for(int j=0;j<flights.size();j++)
+			{
+				JSONObject ojson4 = flights.getJSONObject(j);
+				String flight_id = ojson4.getString("flight_id");
+				System.out.println("flight_id: " + flight_id);
+				Double temp_price = prices.get(flight_id + "price");
+				Double temp_tax = prices.get(flight_id + "tax");
+				System.out.println("temp_price: " + temp_price);
+				if(null == temp_price || (price+tax) < (temp_price+temp_tax))
+				{
+					prices.put(flight_id + "price", price);
+					prices.put(flight_id + "tax", tax);
+				}
+			}
+		}
+		
+	}
+
 	/**
 	 * 
 	 * @Title: getFlightSegements 
-	 * @Description: 获取航班信息
+	 * @Description: 鑾峰彇鑸彮淇℃伅
 	 * @param segJSON
-	 * @return     
+	 * @return聽聽聽 聽
 	 * @throws
 	 */
 	private List<FlightSegement> getFlightSegements(JSONArray segJSON){
@@ -474,9 +561,9 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	/**
 	 * 
 	 * @Title: getFlightNoList 
-	 * @Description: 获取航班号列表
+	 * @Description: 鑾峰彇鑸彮鍙峰垪琛�
 	 * @param segJSON
-	 * @return     
+	 * @return聽聽聽 聽
 	 * @throws
 	 */
 	private List<String> getFlightNoList(JSONArray segJSON){
@@ -494,10 +581,10 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	/**
 	 * 
 	 * @Title: getDepdate 
-	 * @Description: 获取出发日期和返程日期
+	 * @Description: 鑾峰彇鍑哄彂鏃ユ湡鍜岃繑绋嬫棩鏈�
 	 * @param segJSON
 	 * @param flag
-	 * @return     
+	 * @return聽聽聽 聽
 	 * @throws
 	 */
 	private Date getDepdate(JSONArray segJSON,boolean flag){
@@ -515,7 +602,7 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	}
 	
 	/**
-	 * 获取城市三字码
+	 * 鑾峰彇鍩庡競涓夊瓧鐮�
 	 * @param segJSON
 	 * @param flag
 	 * @return
@@ -541,12 +628,12 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	 * @throws ParseException 
 	 * 
 	 * @Title: getFlightDetail 
-	 * @Description: 获取航班详情信息
+	 * @Description: 鑾峰彇鑸彮璇︽儏淇℃伅
 	 * @param flightDetail
 	 * @param jsonArray
 	 * @param ojson
 	 * @param arg1
-	 * @return     
+	 * @return聽聽聽 聽
 	 * @throws
 	 */
 	private FlightDetail getFlightDetail(FlightDetail flightDetail,JSONArray jsonArray,JSONObject ojson,FlightSearchParam arg1) throws ParseException{
@@ -564,7 +651,7 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 		return flightDetail;
 	}
 	
-	/*********************************通用工具类********************************************/
+	/*********************************閫氱敤宸ュ叿绫�*******************************************/
 	HttpClient httpClient = null;
 	protected HttpClient getHttp(FlightSearchParam param){
 		if(httpClient == null){
@@ -576,8 +663,8 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	}
 	
 	/**
-	 * 返回解析后的date对象
-	 * @param date--日期字符串 yyyy-MM-dd
+	 * 杩斿洖瑙ｆ瀽鍚庣殑date瀵硅薄
+	 * @param date--鏃ユ湡瀛楃涓�yyyy-MM-dd
 	 * @return
 	 * @throws ParseException
 	 */
@@ -595,7 +682,7 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	/**
 	 * 
 	 * @param dateStr
-	 * @return 获取年、月、日
+	 * @return 鑾峰彇骞淬�鏈堛�鏃�
 	 */
 	private static String[] getYearMonthDay(String dateStr){
 		String[] arr = new String[3];
@@ -625,10 +712,10 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 		
 	}
 	
-	/*************************************SSL证书认证处理**********************************************/
+	/*************************************SSL璇佷功璁よ瘉澶勭悊**********************************************/
 	
 	/**
-	 * 忽略SSL认证
+	 * 蹇界暐SSL璁よ瘉
 	 * @author kevin
 	 *
 	 */
@@ -702,7 +789,7 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 		 } 
 	
 	/**
-	 * 忽略SSL认证
+	 * 蹇界暐SSL璁よ瘉
 	 * @author kevin
 	 *
 	 */
