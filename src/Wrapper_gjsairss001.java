@@ -86,6 +86,13 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 		
 		searchParam.setDepDate("2014-09-18");
 		searchParam.setRetDate("2014-09-25");
+		
+		/*searchParam.setDep("DKR");
+		searchParam.setArr("ORY");
+		
+		searchParam.setDepDate("2014-07-20");
+		searchParam.setRetDate("2014-07-29");*/
+		
 		//无效日期
 		/*searchParam.setDep("DZA");
 		searchParam.setArr("ORY");
@@ -375,7 +382,6 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 					price = depPrices.get(flight_id + "price");
 					tax = depPrices.get(flight_id + "tax");
 					
-					
 					JSONArray djson = JSON.parseArray(listDetail);
 					
 					for(int j = 0; j < retFlightJSON.size(); j++){
@@ -394,10 +400,7 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 						flightDetail.setMonetaryunit("CAD");
 						flightDetail.setWrapperid(arg1.getWrapperid());
 						
-						//*************************************************
-						flightDetail.setPrice(price);
-						flightDetail.setTax(tax);
-						//**************************************************
+						
 						
 						RoundTripFlightInfo  retFlight = new RoundTripFlightInfo();
 						
@@ -408,8 +411,8 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 						String ret_flight_id = rjson.getString("flight_id");
 						double ret_price = 0;
 						double ret_tax = 0;
-						ret_price = depPrices.get(ret_flight_id + "price");
-						ret_tax = depPrices.get(ret_flight_id + "tax");
+						ret_price = retPrices.get(ret_flight_id + "price");
+						ret_tax = retPrices.get(ret_flight_id + "tax");
 						//************************************************************************
 						List<FlightSegement> retSegs = getFlightSegements(retsegJSON);
 						List<String> retFlightNos = getFlightNoList(retsegJSON);
@@ -420,6 +423,11 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 					    JSONArray array = JSON.parseArray(priceJson.getString("list_bound_price"));
 					    JSONObject object = array.getJSONObject(0);
 					    JSONObject retobject = array.getJSONObject(1);
+					    
+					  //*************************************************
+						flightDetail.setPrice(price+ret_price+tax+ret_tax);
+						flightDetail.setTax(tax+ret_tax);
+						//**************************************************
 					    
 					//	flightDetail = getFlightDetail(flightDetail,jsonArray,ojson,arg1);
 						//*********************************
@@ -479,7 +487,6 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 			System.out.println("bound: " + bound);
 			JSONArray trip_price = ojson1.getJSONArray("list_trip_price");
 			System.out.println("trip_price: " + trip_price);
-			
 			JSONObject ojson2 = trip_price.getJSONObject(0).getJSONArray("list_bound_price").getJSONObject(flag);
 			
 			String _price = ojson2.getString("amount_without_tax");
@@ -523,6 +530,7 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	private List<FlightSegement> getFlightSegements(JSONArray segJSON){
 		List<FlightSegement> oneSegs = new ArrayList<FlightSegement>();
 		List<String> flightNoList = new ArrayList<String>();
+		
 		for(int i = 0; i < segJSON.size(); i++){
 			FlightSegement seg = new FlightSegement();
 			JSONObject fjson = segJSON.getJSONObject(i);
@@ -568,6 +576,7 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	 */
 	private List<String> getFlightNoList(JSONArray segJSON){
 		List<String> flightNoList = new ArrayList<String>();
+
 		for(int i = 0; i < segJSON.size(); i++){
 			JSONObject fjson = segJSON.getJSONObject(i);
 			JSONObject preFlightNo = JSON.parseObject(fjson.getString("airline"));
@@ -609,8 +618,8 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 	 */
 	private String[] getDepAndArrCity(JSONArray segJSON,boolean flag){
 		String[] arr = new String[2];
-		for(int i = 0; i < segJSON.size(); i++){
-			JSONObject fjson = segJSON.getJSONObject(i);
+        if(segJSON.size() == 1){
+            JSONObject fjson = segJSON.getJSONObject(0);
 			
 			JSONObject beginLocation = JSON.parseObject(fjson.getString("b_location"));
 			String depCity = beginLocation.getString("city_code").replaceAll("[^a-zA-Z\\d]", "");
@@ -618,7 +627,18 @@ public class Wrapper_gjsairss001 implements QunarCrawler {
 			String arrCity = endLocation.getString("city_code").replaceAll("[^a-zA-Z\\d]", "");
 			arr[0] = depCity;
 			arr[1] = arrCity;
+		}else{
+			 JSONObject fjson1 = segJSON.getJSONObject(0);
+			 JSONObject beginLocation = JSON.parseObject(fjson1.getString("b_location"));
+			 String depCity = beginLocation.getString("city_code").replaceAll("[^a-zA-Z\\d]", "");
+			 
+			 JSONObject fjson2 = segJSON.getJSONObject(segJSON.size()-1);
+			 JSONObject endLocation = JSON.parseObject(fjson2.getString("e_location"));
+			 String arrCity = endLocation.getString("city_code").replaceAll("[^a-zA-Z\\d]", "");
+			 arr[0] = depCity;
+			 arr[1] = arrCity;
 		}
+	
 		return arr;
 	}
 	
