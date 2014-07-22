@@ -39,7 +39,7 @@ import com.qunar.qfwrapper.util.QFPostMethod;
 
 /**
  * 
- * @ClassName: Wrapper_gjdairju001 
+ * @ClassName: Wrapper_gjsairtn001 
  * @Description:  双程机票抓取
  * @author: LG
  * @date 2014-6-5 
@@ -56,13 +56,15 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 	
 	private static Map<String,String> citys = new HashMap<String, String>();
 	
+	private static String monUnit = "";
+	
 	public static void main(String[] args) {
 
 		FlightSearchParam searchParam = new FlightSearchParam();
 		searchParam.setDep("SYD");
 		searchParam.setArr("PPT"); //CDG
-		searchParam.setDepDate("2014-08-15");
-		searchParam.setRetDate("2014-09-15");
+		searchParam.setDepDate("2014-07-27");
+		searchParam.setRetDate("2014-07-30");
 		searchParam.setTimeOut("60000");
 		searchParam.setToken("");
 		searchParam.setWrapperid("gjsairtn001");
@@ -115,6 +117,11 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 		
 		try {
 			String html = getResultHtml(getHttp(searchParam), GET,SEARCH_FLIGHT_URL,getSearchParamMapForSingle(searchParam));
+		
+			monUnit = org.apache.commons.lang.StringUtils
+					.substringBetween(html, "var currencyCode = '",
+							"';");
+			
 		    return html;
 		} catch (Exception e) {
 		}
@@ -146,13 +153,16 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 			}
 			
 			GetMethod get1 = new QFGetMethod(SEARCH_FLIGHT_URL);
+		
 
 			httpMethod.setFollowRedirects(false);
 			//httpMethod.setFollowRedirects(true);
 			String cookie = StringUtils.join(client.getState().getCookies(),"; ");
+			
 			client.getState().clearCookies();
 			get1.addRequestHeader("Cookie",cookie);
 			client.executeMethod(get1);
+			
 			return get1.getResponseBodyAsString() ;
 			
 		}catch (Exception e) {
@@ -199,6 +209,8 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 	              result.append(param.getValue());
 			}
 			String allUrl = uri.indexOf("?") > 0 ? (uri + "&" + result) : (uri + "?" + result);
+			
+	
 			GetMethod get = new QFGetMethod(allUrl);
 		
 			return get;
@@ -240,6 +252,8 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 		String departure_html = org.apache.commons.lang.StringUtils.substringBetween(html, "DEPARTURE FLIGHT OPTIONS", "Clear Selection");
 		String return_html = org.apache.commons.lang.StringUtils.substringBetween(html, "RETURN FLIGHT OPTIONS", "Clear Selection");
 		
+		
+		
 		if(null == departure_html || null == return_html)
 		{
 			result.setRet(false);
@@ -249,7 +263,9 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
         
         departure_html = departure_html.replaceAll("[\\s\"]", "");
         
+        
         return_html = return_html.replaceAll("[\\s\"]", "");
+        
         
 		if ("Exception".equals(html) || null == html) {
 			result.setRet(false);
@@ -312,6 +328,7 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 			result.setRet(true);
 			result.setStatus(Constants.SUCCESS);
 			result.setData(roundList);
+			
 			return result;
 	}
 
@@ -326,7 +343,6 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 		  String arrTime = null;
 		  String depDate = null;
 		  String arrDate = null;
-		  String monUnit = "USD";
 		  
 		  FlightSegement seg = null;
 		  List<String> flightNos = new ArrayList<String>();
@@ -335,6 +351,7 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 		  OneWayFlightInfo baseFlight = new OneWayFlightInfo();
 		  
 		  Double price = Double.MAX_VALUE;
+		  
 
 		  String start = "<trid=rowFM_" + flag + "_0_0";
 		  String end = "<tdcolspan=9>";
@@ -343,12 +360,16 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 		  String[] str = new_html.split("<trid=rowFM_" + flag + "_[0-9]_0");
 		  for(int i=0;i<str.length;i++)
 		  {
+			  
+			  
 			  String regx_price = "\\SD<br/>(.*?)\\<";
+			  
 			  Pattern p_price = Pattern.compile(regx_price);
 	          Matcher m_price = p_price.matcher(str[i]);
 	          while(m_price.find())
 	        	{
 	        		String _price = m_price.group(1);
+	        		
 	        		double temp_price = Double.MAX_VALUE;
 	        		if(!"N/A".equals("_price")&&null!=_price)
 	        		{
@@ -361,6 +382,7 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 	        	  continue;
 
 			  String regx1 = "\\<spanclass='FlightNumberInTable'>(.*?)\\</td></tr>";
+	         
 	          Pattern p1 = Pattern.compile(regx1);
 	          Matcher m1 = p1.matcher(str[i]);
 	          int x = 0;
@@ -369,6 +391,7 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 	        	seg = new FlightSegement();
 	        	
 	        	String info = m1.group(1);
+	        	
 	        	
 	        	String regx2 = "\\<tdclass=step2CellflightInfo_middle>(.*?)\\<br/>";
 	        	Pattern p2 = Pattern.compile(regx2);
@@ -385,6 +408,7 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 	        	flightNo = org.apache.commons.lang.StringUtils.substringBetween(info, "", "</span>");
 	        	flightNos.add(flightNo);
 	        	
+	        	
 	        	String regx3 = "\\<br/>(.*?)\\</td>";
 	        	Pattern p3 = Pattern.compile(regx3);
 	        	Matcher m3 = p3.matcher(info);
@@ -392,14 +416,17 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 	        	while(m3.find())
 	        	{
 	        			String time = m3.group(1);
+	        			
 	            		if(time.contains(":") && k>0) depTime = time;
 	            		else if(time.contains(":") && k<=0) arrTime = time;  
 	            		k--;
 	        	}
+	        	
 	        	if(x != 0)
 	        	{ 
 	        	arrTime = info.substring(info.length() -8 , info.length());
 	        	}
+	        	
 	        	x++;
 	        	
 	        	seg.setDepairport((String) citys.get(depPort));
@@ -421,7 +448,6 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 	          }
 	          flightDetail.setDepcity(searchParam.getDep());
 	          flightDetail.setArrcity(searchParam.getArr());
-	          //flightDetail.setDepdate(forMatDate(searchParam.getDepDate()));
 	          if(0 == flag)
 	          {
 	        	  flightDetail.setDepdate(forMatDate(searchParam.getDepDate()));  
@@ -532,6 +558,7 @@ public class Wrapper_gjsairtn001 implements QunarCrawler {
 
 		Date date = forMatDate(strDate);
 		int day = getDay(date, time);
+	
 		Calendar now = Calendar.getInstance();
 		now.setTime(date);
 		now.set(Calendar.DATE, now.get(Calendar.DATE) + day);
